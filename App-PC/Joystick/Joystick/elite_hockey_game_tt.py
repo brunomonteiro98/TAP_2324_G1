@@ -5,7 +5,7 @@ import time
 
 # calculate flange position after joystick input updated (input value used as acceleration)
 def calculate_position(key_x, key_y, t, speed: list, position: list):
-    new_speed_x = speed[0] + 300*key_x*t
+    new_speed_x = speed[0] + 300*key_x*t # 300 is the acceleration of the flange
     new_speed_y = speed[1] - 300*key_y*t
     new_position_x = position[0] + new_speed_x*t
     new_position_y = position[1] + new_speed_y*t
@@ -23,7 +23,7 @@ def calculate_position2(key_x, key_y, t, position: list):
     return new_position_x, new_position_y
 
 
-ip = "192.168.1.200"
+ip = "192.168.2.66"
 conSuc, sock = ejson.connectETController(ip)
 
 if conSuc:
@@ -37,8 +37,9 @@ if conSuc:
         if leftStart:
             time.sleep(0.01)
             # obtain robot's original position and joint angle
-            suc, v_origin, id = ejson.sendCMD(sock, "getRobotPose")
-            suc, p_origin, id = ejson.sendCMD(sock, "getRobotPos")
+            suc, v_origin, id = ejson.sendCMD(sock, "getRobotPose") # 获取机器人当前位姿
+            #print(v_origin)
+            suc, p_origin, id = ejson.sendCMD(sock, "getRobotPos") # 获取机器人当前关节角
             x_now = v_origin[0]
             y_now = v_origin[1]
             speed_x = 0
@@ -54,7 +55,7 @@ if conSuc:
                 # stops the game if button RB is pressed
                 if rightExit:
                     suc, result, id = ejson.sendCMD(sock, "stop")
-                    suc, result, id = ejson.sendCMD(sock, "tt_clear_servo_joint_buf", {"clear": 0})
+                    suc, result, id = ejson.sendCMD(sock, "tt_clear_servo_joint_buf", {"clear": 0}) #
                     break
                 # get new position based on joystick key value and add it to tt buff
                 x_now, y_now = calculate_position2(axis_x, axis_y, 0.05, [x_now, y_now])

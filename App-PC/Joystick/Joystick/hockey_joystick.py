@@ -22,11 +22,13 @@ class Joystick(object):
         self.buttonB = 0
         self.buttonLB = 0
         self.buttonRB = 0
+        self.buttonX = 0
+        self.buttonY = 0
 
     # updates key values everytime invoked
     def get_buttons(self):
-        for event in pygame.event.get():
-            pass
+        for event in pygame.event.get(): # User did something
+            pass # Do nothing for now
 
         self.axis1 = self.joystick.get_axis(0)
         self.axis2 = self.joystick.get_axis(1)
