@@ -36,4 +36,4 @@ def read_serial_data(): # Função para ler os dados disponíveis na porta seria
         return None # Retorna None se não houver dados disponíveis
 
 if __name__ == "__main__":  # O código abaixo será executado apenas quando este arquivo for executado diretamente
-    #pass # Nada acontece
+    pass # Nada acontece

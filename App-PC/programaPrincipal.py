@@ -16,6 +16,14 @@ gx = data[4]
 gy = data[5]
 gz = data[6]"""
 
+"""
+Tentar meter o input como o rato. Ver pygame mouse motion 1024.
+Tentar passar a e g a uma única.
+Falar com os gajos json de output.
+Verificar diferença entre base e ponta. Se for necessário passar de base a ponta (mandar e receber). 
+Incremento não deve fazer diferença
+"""
+
 # Calcula a posição do flange após a atualização da entrada do sensor
 # ax: incremento de posição em x
 # ay: incremento de posição em y
@@ -110,8 +118,7 @@ if conSuc:  # Se a conexão for bem sucedida
                 # get new angle based on sensor key value and add it to tt buff
                 rx_now, ry_now, rz_now = calculate_position_g(gx, gy, gz, [rx_now, ry_now, rz_now])
                 pose_now = [x_now, y_now, z_now, rx_now, ry_now, rz_now]
-                suc, p_target, id = ether.sendCMD(sock, "inverseKinematic",
-                                                  {"targetPose": pose_now})
+                suc, p_target, id = ether.sendCMD(sock, "inverseKinematic",{"targetPose": pose_now})
                 suc, result, id = ether.sendCMD(sock, "tt_put_servo_joint_to_buf", {"targetPos": p_target})
                 time.sleep(0.02)
         suc, result, id = ether.sendCMD(sock, "stop")
