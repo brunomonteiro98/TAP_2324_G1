@@ -6,16 +6,14 @@ import time  # Biblioteca para manipulação de tempo
 
 # Conexões
 # Conectar ao ESP32 por porta serial
-COMPort_Name = input("Porta COM (Ex:COM2) - ")  # Porta COM do ESP32 (colocar COM2)
-serie.connect_serial_port(COMPort_Name)
+portName = input("Porta COM (Ex:COM2) - ")  # Porta COM do ESP32 (colocar COM2)
+serie.connect_serial_port(portName)  # Conectar à porta serial
 # Conectar ao controlador por Ethernet
 ip = input("Endereço IP do controlador (mudar para o IP do controlador) - ")  # IP do controlador (colocar 192.168.2.66)
 conSuc, sock = ether.connectETController(ip)  # Conectar ao controlador
 
 """
-Tentar meter o input como o rato. Ver pygame mouse motion 1024.
 Verificar diferença entre base e ponta. Se for necessário passar de base a ponta (mandar e receber). 
-Incremento não deve fazer diferença
 """
 
 
