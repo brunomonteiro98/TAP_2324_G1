@@ -18,6 +18,21 @@
 float pitch;
 float roll;
 
+float pitchFiltered_old=0;
+float pitchFiltered_new;
+float rollFiltered_old=0;
+float rollFiltered_new;
+
+float new_weight = 0.2;
+float old_weight = 0.8;
+
+float pitchG = 0;
+float rollG = 0;
+
+float dt;
+unsigned long millis_old;
+
+
 // Adafruit_ICM20948 icm: Creates an instance of the Adafruit_ICM20948 class. 
 // This object will be used to interact with the ICM20948 sensor for operations like initialization, configuration, and reading sensor data.
 Adafruit_ICM20948 icm;
@@ -159,6 +174,8 @@ float gyro_rate = 1100 / (1.0 + gyro_divisor);
   Serial.println();
 
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // Initialize OLED display
+
+  millis_old = millis();
 }
 
 void loop() {
@@ -171,40 +188,42 @@ void loop() {
   // Declare a variable 'temp' of type 'sensors_event_t' to store temperature data.
   sensors_event_t temp;
 
+
+
   // Fetch the latest sensor events (accelerometer, gyroscope, magnetometer, and temperature)
   // from the ICM20948 sensor and store them in the previously declared variables.
   // The '&' operator is used to pass the address of the variable, meaning you're passing
   // a reference to the variable so that 'getEvent()' can modify the original.
   icm.getEvent(&accel, &gyro, &temp, &mag);
 
-  Serial.print("\t\tTemperature ");
-  Serial.print(temp.temperature);
-  Serial.println(" deg C");
+  //Serial.print("\t\tTemperature ");
+  //Serial.print(temp.temperature);
+  //Serial.println(" deg C");
 
-  Serial.print("\t\tAccel X: ");
-  Serial.print(accel.acceleration.x);
-  Serial.print(" \tY: ");
-  Serial.print(accel.acceleration.y);
-  Serial.print(" \tZ: ");
-  Serial.print(accel.acceleration.z);
-  Serial.println(" m/s^2 ");
+  //Serial.print("\t\tAccel X: ");
+  //Serial.print(accel.acceleration.x);
+  //Serial.print(" \tY: ");
+  //Serial.print(accel.acceleration.y);
+  //Serial.print(" \tZ: ");
+  //Serial.print(accel.acceleration.z);
+  //Serial.println(" m/s^2 ");
 
-  Serial.print("\t\tMag X: ");
-  Serial.print(mag.magnetic.x);
-  Serial.print(" \tY: ");
-  Serial.print(mag.magnetic.y);
-  Serial.print(" \tZ: ");
-  Serial.print(mag.magnetic.z);
-  Serial.println(" uT");
+  //Serial.print("\t\tMag X: ");
+  //Serial.print(mag.magnetic.x);
+  //Serial.print(" \tY: ");
+  //Serial.print(mag.magnetic.y);
+  //Serial.print(" \tZ: ");
+  //Serial.print(mag.magnetic.z);
+  //Serial.println(" uT");
 
-  Serial.print("\t\tGyro X: ");
-  Serial.print(gyro.gyro.x);
-  Serial.print(" \tY: ");
-  Serial.print(gyro.gyro.y);
-  Serial.print(" \tZ: ");
-  Serial.print(gyro.gyro.z);
-  Serial.println(" radians/s ");
-  Serial.println();
+  //Serial.print("\t\tGyro X: ");
+  //Serial.print(gyro.gyro.x);
+  //Serial.print(" \tY: ");
+  //Serial.print(gyro.gyro.y);
+  //Serial.print(" \tZ: ");
+  //Serial.print(gyro.gyro.z);
+  //Serial.println(" radians/s ");
+  //Serial.println();
 
   delay(100);
 
@@ -213,13 +232,36 @@ void loop() {
   float accelerationY = accel.acceleration.y ;
   float accelerationZ = accel.acceleration.z ;
 
+  //read gyro values from ICM20948 sensor
+
+
   pitch = -atan2(accel.acceleration.x / 9.8, accel.acceleration.z / 9.8) / 2 / 3.141592654 * 360;
   roll = -atan2(accel.acceleration.y / 9.8, accel.acceleration.z / 9.8) / 2 / 3.141592654 * 360;
+  
+  pitchFiltered_new = old_weight*pitchFiltered_old + new_weight*pitch;
+  rollFiltered_new = old_weight*rollFiltered_old + new_weight*roll;
 
-  Serial.print("Pitch: ");
-  Serial.println(pitch);
-  Serial.print("Roll: ");
-  Serial.println(roll);
+  dt=(millis()-millis_old)/1000.;
+  millis_old=millis();
+
+  pitchG = pitchG + gyro.gyro.y*dt;
+  rollG = rollG + gyro.gyro.x*dt;
+
+  //Serial.print("Pitch: ");
+  //Serial.println(pitch);
+  //Serial.print(" ");
+  //Serial.println(roll);
+
+  Serial.println(pitchFiltered_new);
+  Serial.print(" ");
+  Serial.println(rollFiltered_new);
+
+  pitchFiltered_old = pitchFiltered_new;
+  rollFiltered_old = rollFiltered_new;
+
+  //Serial.println(pitchG);
+  //Serial.print(" ");
+  //Serial.println(rollG);  
 
   // Display accelerometer values on OLED display
   display.clearDisplay();
