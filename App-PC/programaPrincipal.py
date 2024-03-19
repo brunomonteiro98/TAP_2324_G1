@@ -5,9 +5,14 @@ import numpy  # Biblioteca para cálculos matemáticos
 import time  # Biblioteca para manipulação de tempo
 
 # Conexões
-# Conectar ao ESP32 por porta serial
-portName = input("Porta COM (Ex:COM2) - ")  # Porta COM do ESP32 (colocar COM2)
-serie.connect_serial_port(portName)  # Conectar à porta serial
+# Conectar ao ESP32 por porta serial ou wifi
+sow = input("Conectar ao ESP32 por porta serial ou por wifi? (s/w) - ")
+match sow:
+    case "s":
+        portName = input("Porta COM (Ex:COM2) - ")  # Porta COM do ESP32 (colocar COM2)
+        serie.connect_serial_port(portName)  # Conectar à porta serial
+    case "w":
+        print("") # Conectar ao ESP32 por wifi !!!!!!!!!!!! Continuar
 # Conectar ao controlador por Ethernet
 ip = input("Endereço IP do controlador (mudar para o IP do controlador) - ")  # IP do controlador (colocar 192.168.2.66)
 conSuc, sock = ether.connectETController(ip)  # Conectar ao controlador
