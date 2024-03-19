@@ -13,6 +13,10 @@
 // Adafruit_SSD1306.h: Specific library for interfacing with the Adafruit SSD1306 OLED display, uses Adafruit_GFX for graphics functions.
 #include <Adafruit_SSD1306.h>
 
+#include <math.h>
+
+float pitch;
+float roll;
 
 // Adafruit_ICM20948 icm: Creates an instance of the Adafruit_ICM20948 class. 
 // This object will be used to interact with the ICM20948 sensor for operations like initialization, configuration, and reading sensor data.
@@ -209,6 +213,14 @@ void loop() {
   float accelerationY = accel.acceleration.y ;
   float accelerationZ = accel.acceleration.z ;
 
+  pitch = -atan2(accel.acceleration.x / 9.8, accel.acceleration.z / 9.8) / 2 / 3.141592654 * 360;
+  roll = -atan2(accel.acceleration.y / 9.8, accel.acceleration.z / 9.8) / 2 / 3.141592654 * 360;
+
+  Serial.print("Pitch: ");
+  Serial.println(pitch);
+  Serial.print("Roll: ");
+  Serial.println(roll);
+
   // Display accelerometer values on OLED display
   display.clearDisplay();
   display.setTextSize(1);
@@ -221,6 +233,8 @@ void loop() {
   display.print("Acc Z: ");
   display.println(accelerationZ);
   display.display();
+
+
 
   delay(100);  // Delay between readings
 }
