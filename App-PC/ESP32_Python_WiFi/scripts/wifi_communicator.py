@@ -4,31 +4,19 @@ import threading
 from queue import Queue
 
 
-class InMessage:
-    '''
-    Incoming Message definition
-    NOTE: This is created so that you can add as many flags as you want,
-    without changing the interface, and you'd only need to chance the decoding method
-    '''
-    def __init__(self, data: str, require_ack: bool, client_addr: str) -> None:
-        self.data = data
-        self.require_acknowledgment = require_ack
-        self.client_addr = client_addr
+class InMessage:  # Incoming Message definition
+    def __init__(self, data: str, require_ack: bool, client_addr: str) -> None:  # Constructor
+        self.data = data  # The data received
+        self.require_acknowledgment = require_ack  # If the message requires an acknowledgment
+        self.client_addr = client_addr  # The client address
 
 
-class OutMessage:
-    '''
-    Outgoing Message definition
-    NOTE: This is created so that you can add as many flags as you want,
-    without changing the interface, and you'd only need to chance the encoding method
-    '''
-    def __init__(self, data: str, require_ack: bool = False) -> None:
-        self.data = data
+class OutMessage:  # Outgoing Message definition
+    def __init__(self, data: str, require_ack: bool = False) -> None:  # Constructor
+        self.data = data  # The data to be sent
 
 
 class WiFiCommunicator:
-    '''
-    '''
     ACKNOWLEDGMENT_FLAG = 'A'
     CPU_RELEASE_SLEEP = 0.000_001
 
@@ -42,37 +30,37 @@ class WiFiCommunicator:
         assert max_buffer_sz > 0, f"Buffer size must be > 0 [{max_buffer_sz = }]"
         assert in_queue_sz >= 0, f"Queue size can't be negative [{in_queue_sz = }]"
         assert out_queue_sz >= 0, f"Queue size can't be negative [{out_queue_sz = }]"
-        
+
         # Signal to the communicator to "Rest In Peace"
         self._rip = False
         self._have_client = False
 
-
-        self._max_buffer_size = max_buffer_sz
-        self._incoming_messages_queue = Queue(maxsize=in_queue_sz)
-        self._outgoing_messages_queue = Queue(maxsize=out_queue_sz)
+        self._max_buffer_size = max_buffer_sz  # The maximum amount of bytes to be received at once
+        self._incoming_messages_queue = Queue(maxsize=in_queue_sz)  # Incoming messages queue
+        self._outgoing_messages_queue = Queue(maxsize=out_queue_sz)  # Outgoing messages queue
 
         # Client info
-        self._client = None
-        self._client_address = None
+        self._client = None  # The client socket
+        self._client_address = None  # The client address
 
         # Socket creation
-        soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Create a socket object
+        soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Allow the socket to be reused
 
         # To allow the ESP through the firewall (if u had firewall problems, and u're on Linux):
         # $ sudo iptables -I INPUT -s ESP.IP.GOES.HERE -p tcp --dport 15000 -j ACCEPT 
-        soc.bind(('0.0.0.0', port))
-        soc.listen(0)
+        soc.bind(('0.0.0.0', port))  # Bind to the port
+        soc.listen(0)  # Now wait for client connection.
 
         # Start the show
         self._threads = [
-            threading.Thread(target=self.__listener_thread, daemon=True),
-            threading.Thread(target=self.__sender_thread, daemon=True),
+            threading.Thread(target=self.__listener_thread, daemon=True),  # The listener thread
+            threading.Thread(target=self.__sender_thread, daemon=True),  # The sender thread
             threading.Thread(target=self.__wait_for_connection_thread, daemon=True, args=[soc]),
+            # The connection thread
         ]
         for thread in self._threads:
-            thread.start()
+            thread.start()  # Start the thread
 
     def get_message(self) -> InMessage:
         '''
@@ -92,7 +80,7 @@ class WiFiCommunicator:
         '''
         if self._client is not None:
             self._client.close()
-        
+
         self._rip = True
         for thread in self._threads:
             thread.join(0.1)

@@ -1,1 +1,45 @@
-Teste README
+Ligar robot:
+    1- Ligar robot
+    2- Fazer calibração inicial.
+    3- Verificar ip e subnet mask
+    4- Meter em Remote
+    5- Ligar servos
+
+Modulo Serie:
+    1- Ligar cabo usb ao pc e ao robot
+    2- Ir ao gestor de dispositivos e ver a porta COM que o robot está a usar
+    3- Inserir porta COM no programa
+
+Modulo Wifi:
+    1- Smartphone cria hotspot wifi com nome "test" e senha "123456789"
+    2- Escolher ip fixo para o modulo wifi (mesmo q está no esp) e colocá-lo nas definições wifi do pc ()
+    3- Porta 11111
+
+Modulo Ethernet:
+    1- Ligar cabo ethernet ao pc e ao robot
+    2- Mudar o ip do pc nas definições (ip manual) para um no mesmo ip do robot com ultimo nr diferente e mesma netmask
+     Ex:"192.168.2.1". (Ver netmask)
+    3- Ir ao Cmd dar ping ao ip do robot (para verificar se conectado)
+    4- Inserir ip do robot no programa
+
+Outros:
+Ifs para parar e iniciar na consola. Assim como gravar.
+
+Recebe do esp32 já tratados e manda o robô mover-se para x. Meter seguranças tipo se velocidade mt grande limitar ou parar.
+
+Para programa receber e guardar precisamos de um botão que comece a gravação de posições e recebe do robo e guarda em documento.
+Quando for para ativar meter em loop a correr o doxumento gravado anteriormente.
+
+Mais botões no comando secalhar para definir o zero.
+E para ligar e desligar o controlo por comando e para parar e iniciar controlo por comando e para ir para o zero do robô como segurança.
+Ver o que fisico e o que acionar no pc.
+
+Botão send ativa um timer que manda a cada segundo ... e desativa tbm.
+
+Programa guarda posição inicial do robot. Manda-o para aí. Guarda tbm todos os incrementos até o pause e o tempo em que foram mandados.
+Quando play manda os comandos como se fosse o sensor.
+Tirar posição inicial e final. Subtrair a final à inicial.
+Quando começar o programa começar mandar esse valor como incremento.
+Os programas seriam escritos num ficheiro e depois lia-se de um ficheiro. Fazer readline() send().
+Ou lia-se tudo e depois mandava-se aos pouquinhos? O que acontecia quando o programa pará-se?
+Como fazer o loop de novo? Bastava ler o ficheiro outra vez...

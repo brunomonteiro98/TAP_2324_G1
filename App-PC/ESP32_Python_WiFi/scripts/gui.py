@@ -103,8 +103,6 @@ class GUI(tk.Tk):
     # ------------------------------- #
 
     def __messages_receiving_thread(self):
-        '''
-        '''
         while not self._end_signal:
             message = self._communicator.get_message()
 

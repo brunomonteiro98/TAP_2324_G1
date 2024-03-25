@@ -36,30 +36,33 @@ def disconnectETController(sock):
 # socket: socket de comunicação com o controlador
 # ret: reposta do controlador
 # jdata: mensagem recebida do controlador
-def sendCMD(sock, cmd, params=None, id=1) -> object:
-    if (not params):  # Se não houver parâmetros, envia uma string vazia
+def sendCMD(sock, cmd, debug="n", params=None, id=1) -> object:
+    if not params:  # Se não houver parâmetros, envia uma string vazia
         params = []  # Cria uma lista vazia
     else:  # Se houver parâmetros, converte para string
         params = json.dumps(params)  # Converte os parâmetros para string
     sendStr = ("{{\"method\":\"{0}\",\"params\":{1},\"jsonrpc\":\"2.0\",\"id\":{2}}}".format
                (cmd, params, id) + "\n")  # Cria a mensagem a ser enviada
     try:  # Tenta enviar a mensagem
-        print("Ethernet - sendStr:",sendStr) #Imprime a mensagem enviada no terminal para debug
         sock.sendall(bytes(sendStr, "utf-8"))  # Envia a mensagem
         ret = sock.recv(1024)  # Recebe a resposta
-        print("Ethernet - ret:",ret) #Imprime a mensagem recebida no terminal para debug
         jdata = json.loads(str(ret, "utf-8"))  # Converte a resposta para json
-        print(jdata) #Imprime a mensagem recebida no terminal para debug
-        if ("result" in jdata.keys()):  # Se houver resultado, retorna o resultado
-            print("Ethernet - jdata:",jdata["result"], jdata["id"]) #Imprime o resultado no terminal para debug
-            return (True, json.loads(jdata["result"]), jdata["id"])  # Retorna o resultado
-        elif ("error" in jdata.keys()):  # Se houver erro, retorna o erro
-            print("Ethernet - jdata:",jdata['error']['message'])  # Imprime a mensagem de erro
-            return (False, json.loads(jdata["error"]), jdata["id"])  # Retorna o erro
+        if debug == "s":
+            print("Ethernet - sendStr:", sendStr)  # Imprime a mensagem enviada no terminal para debug
+            print("Ethernet - ret:", ret)  # Imprime a mensagem recebida no terminal para debug
+            print(jdata)  # Imprime a mensagem recebida no terminal para debug
+        if "result" in jdata.keys():  # Se houver resultado, retorna o resultado
+            if debug == "s":
+                print("Ethernet - jdata:", jdata["result"], jdata["id"])  # Imprime o resultado no terminal para debug
+            return True, json.loads(jdata["result"]), jdata["id"]  # Retorna o resultado
+        elif "error" in jdata.keys():  # Se houver erro, retorna o erro
+            if debug == "s":
+                print("Ethernet - jdata:", jdata['error']['message'])  # Imprime a mensagem de erro
+            return False, json.loads(jdata["error"]), jdata["id"]  # Retorna o erro
         else:  # Se não houver resultado nem erro, retorna a mensagem recebida
-            return (False, None, None)  # Retorna a mensagem recebida
+            return False, None, None  # Retorna a mensagem recebida
     except Exception as e:  # Se houver erro na comunicação, retorna o erro
-        return (False, None, None)  # Retorna o erro
+        return False, None, None  # Retorna o erro
 
 
 if __name__ == "__main__":  # O código abaixo será executado apenas quando este arquivo for executado diretamente
