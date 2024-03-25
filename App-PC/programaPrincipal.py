@@ -2,6 +2,7 @@
 import keyboard  # Biblioteca para manipulação de teclado
 import moduloEthernet as ether  # Biblioteca para comunicação Ethernet
 import moduloSerie as serie  # Biblioteca para comunicação serial
+from moduloWifi import WiFiCommunicator  # Biblioteca para comunicação wifi
 import numpy  # Biblioteca para cálculos matemáticos
 import time  # Biblioteca para manipulação de tempo
 
@@ -13,17 +14,19 @@ match sow:
         portName = input("Porta COM (Ex:COM2) - ")  # Porta COM do ESP32 (colocar COM2)
         serie.connect_serial_port(portName)  # Conectar à porta serial
     case "w":
-        print("")  # Conectar ao ESP32 por wifi !!!!!!!!!!!! Continuar
+        communicator = WiFiCommunicator(max_buffer_sz=128)  # Criar o comunicador WiFi (máximo de 128 bytes)
+
 # Conectar ao controlador por Ethernet
 ip = input("Endereço IP do controlador (mudar para o IP do controlador) - ")  # IP do controlador (colocar 192.168.2.66)
 # ip = "192.168.2.66"
 conSuc, sock = ether.connectETController(ip)  # Conectar ao controlador
 
+# Velocidade do robô (0-100%)
 speed = int(input("Velocidade do robô (0-100%) - "))  # Velocidade do robô
 if speed > 100:  # Se a velocidade for maior que 100%, define a velocidade como 100%
-    speed = 100
+    speed = 100  # Velocidade do robô
 elif speed < 0:  # Se a velocidade for menor que 0%, define a velocidade como 0%
-    speed = 0
+    speed = 0  # Velocidade do robô
 
 # Debug
 debug = input("Debug? (s/n) - ")
@@ -34,7 +37,11 @@ debug = input("Debug? (s/n) - ")
 # angle: lista com os ângulos atuais
 def calculate_position(position: list, angle: list):
     # Ler os dados do sensor
-    data = serie.read_serial_data(debug)
+    data = []  # Inicializar a lista de dados
+    if sow == "s":  # Se a conexão for por porta serial
+        data = serie.read_serial_data(debug)  # Ler os dados do sensor
+    elif sow == "w":  # Se a conexão for por wifi
+        data = communicator.read_wifi_data(debug)  # Ler os dados do sensor
     ax = data[0]
     ay = data[1]
     az = data[2]
@@ -76,31 +83,33 @@ def calculate_position(position: list, angle: list):
         new_angle_z = -numpy.pi / 2
     if new_angle_z >= numpy.pi / 2:
         new_angle_z = numpy.pi / 2
-    # Output
+    # Debug (se ativado)
     if debug == "s":
         print("Principal - data:", data)
         print("Principal - nova posição: (", new_position_x, ", ", new_position_y, ", ", new_position_z, ", ",
-              new_angle_x,
-              ", ", new_angle_y, ", ", new_angle_z, ")")
+              new_angle_x, ", ", new_angle_y, ", ", new_angle_z, ")")
+        # Output
     return new_position_x, new_position_y, new_position_z, new_angle_x, new_angle_y, new_angle_z
 
 
 if conSuc:  # Se a conexão for bem sucedida
     stop = False
     _continue = "s"
-    initialpoint = ([0, 100, 100, 0, 0, 0])  # posição inicial do robot!!!!!!!!!!!!!VERIFICAR!!!!!!!!!!!!!!!!!!!!!
+    initialpoint = ([200, 0, 100, 0, 0, 0])  # posição inicial do robô!!!!!!!!!!!!!VERIFICAR!!!!!!!!!!!!!!!!!!!!!
     inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
     # Começa o main "loop"
     while True:
+        # Pergunta se o utilizador quer continuar após parar (não é necessário na primeira vez)
         if stop:
             _continue = input("Para continuar insira 's' caso contrário o programa para - ")
             inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
             if _continue != "s":
                 break
             stop = False
+        # Verifica se o utilizador quer continuar após parar (não é necessário na primeira vez)
         if _continue == "s":
             time.sleep(0.01)
-            # obtain robot's original position and joint angle
+            # Obtain robot's original position and joint angle
             suc, v_origin, id = ether.sendCMD(sock, "get_tcp_pose", debug)  # Get robot's current pose (!!!tool!!!)
             x_now = v_origin[0]
             y_now = v_origin[1]
@@ -111,34 +120,37 @@ if conSuc:  # Se a conexão for bem sucedida
             pose_now = []
             if debug == "s":
                 print("Principal - v_origin:", v_origin)
-            # transparent transmission init
-            suc, result, id = ether.sendCMD(sock, "transparent_transmission_init", debug,
-                                            {"lookahead": 200, "t": 20, "smoothness": 0.1})
-            suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})  # Set robot's speed
-
+            # Initialize transparent transmission
+            suc, result, id = ether.sendCMD(sock, "transparent_transmission_init",
+                                            debug, {"lookahead": 200, "t": 20, "smoothness": 0.1})
+            # Set robot's speed
+            suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})
+            # Move robot to initialpos if requested
             if inicialpos == "s":
                 suc, result, id = ether.sendCMD(sock, "moveByJoint", debug, {"targetPos": initialpoint,
-                                                                             "speed": speed, "acc": 10,
-                                                                             "dec": 10})  # Move robot to initialpos
-            # CALIBRAR ACELERAÇÂO E DESACELERAÇÂO !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                                                                             "speed": speed, "acc": 10, "dec": 10})
             while True:
-                if debug == "s":
-                    print("Para parar insira 'q'")
+                # Stop the robot if 'q' is pressed
+                print("Para parar insira 'q'")
                 if keyboard.is_pressed("q"):
                     suc, result, id = ether.sendCMD(sock, "stop")
                     suc, result, id = ether.sendCMD(sock, "tt_clear_servo_joint_buf", debug, {"clear": 0})
                     stop = True
                     break
-                # get new position and angle based on sensor key value and add it to tt buff
+                # Get new position and angle based on sensor key value and add it to tt buff
                 x_now, y_now, z_now, rx_now, ry_now, rz_now = calculate_position([x_now, y_now, z_now],
                                                                                  [rx_now, ry_now, rz_now])
                 pose_now = [x_now, y_now, z_now, rx_now, ry_now, rz_now]
                 if debug == "s":
                     print("Principal - pose_now:", pose_now)
+                # Inverse kinematics and send to buffer
                 suc, p_target, id = ether.sendCMD(sock, "inverseKinematic", debug, {"targetPose": pose_now})
                 suc, result, id = ether.sendCMD(sock, "tt_put_servo_joint_to_buf", debug, {"targetPos": p_target})
                 time.sleep(0.02)
+        # Stop the robot
         suc, result, id = ether.sendCMD(sock, "stop")
         time.sleep(0.01)
+# Desconectar o controlador, a porta serial e o comunicador wifi
 ether.disconnectETController(sock)
 serie.close_serial_port()
+communicator.destroy()
