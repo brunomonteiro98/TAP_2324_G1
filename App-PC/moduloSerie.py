@@ -25,9 +25,11 @@ def close_serial_port():
 # Função para ler os dados disponíveis na porta serial
 def read_serial_data():  # Função para ler os dados disponíveis na porta serial
     data = portaSerie.readline()  # Lê a linha disponível
+    print("Serie - data:",data)  # Imprime a mensagem recebida no terminal para debug
     jdata = json.loads(str(data, 'utf-8'))  # Converte a resposta para json
-    data = [int(jdata["Item1"]), int(jdata["Item2"]), int(jdata["Item3"]), int(jdata["Item4"]), int(jdata["Item5"]),
-            int(jdata["Item6"])]
+    data = [(jdata["Item1"]), (jdata["Item2"]), (jdata["Item3"]), (jdata["Item4"]),
+            (jdata["Item5"]), (jdata["Item6"])]
+    print("Serie - data:",data)  # Imprime a mensagem recebida no terminal para debug
     return data
 
 

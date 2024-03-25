@@ -4,6 +4,7 @@ import moduloSerie as serie  # Biblioteca para comunicação serial
 import numpy  # Biblioteca para cálculos matemáticos
 import time  # Biblioteca para manipulação de tempo
 
+
 # Conexões
 # Conectar ao ESP32 por porta serial ou wifi
 sow = input("Conectar ao ESP32 por porta serial ou por wifi? (s/w) - ")
@@ -14,7 +15,8 @@ match sow:
     case "w":
         print("") # Conectar ao ESP32 por wifi !!!!!!!!!!!! Continuar
 # Conectar ao controlador por Ethernet
-ip = input("Endereço IP do controlador (mudar para o IP do controlador) - ")  # IP do controlador (colocar 192.168.2.66)
+#ip = input("Endereço IP do controlador (mudar para o IP do controlador) - ")  # IP do controlador (colocar 192.168.2.66)
+ip = "192.168.2.66"
 conSuc, sock = ether.connectETController(ip)  # Conectar ao controlador
 
 """
@@ -28,12 +30,12 @@ Verificar diferença entre base e ponta. Se for necessário passar de base a pon
 def calculate_position(position: list, angle: list):
     # Ler os dados do sensor
     data = serie.read_serial_data()
-    ax = data[1]
-    ay = data[2]
-    az = data[3]
-    gx = data[4]
-    gy = data[5]
-    gz = data[6]
+    ax = data[0]
+    ay = data[1]
+    az = data[2]
+    gx = data[3]
+    gy = data[4]
+    gz = data[5]
     # Calcular a nova posição
     new_position_x = position[0] + ax
     new_position_y = position[1] + ay
@@ -70,6 +72,9 @@ def calculate_position(position: list, angle: list):
     if new_angle_z >= numpy.pi / 2:
         new_angle_z = numpy.pi / 2
     # Output
+    print("Principal - data:",data)
+    print("Principal - nova posição: (", new_position_x, ", ", new_position_y, ", ", new_position_z, ", ", new_angle_x, ", "
+          , new_angle_y, ", ", new_angle_z, ")")
     return new_position_x, new_position_y, new_position_z, new_angle_x, new_angle_y, new_angle_z
 
 
@@ -92,6 +97,8 @@ if conSuc:  # Se a conexão for bem sucedida
             speed_y = 0
             speed_z = 0
             pose_now = []
+            print("Principal - v_origin:",v_origin)
+            print("Principal - p_origin:",p_origin)
             # transparent transmission init
             suc, result, id = ether.sendCMD(sock, "transparent_transmission_init",
                                             {"lookahead": 200, "t": 20, "smoothness": 0.1})
@@ -105,6 +112,7 @@ if conSuc:  # Se a conexão for bem sucedida
                 x_now, y_now, z_now, rx_now, ry_now, rz_now = calculate_position([x_now, y_now, z_now],
                                                                                  [rx_now, ry_now, rz_now])
                 pose_now = [x_now, y_now, z_now, rx_now, ry_now, rz_now]
+                print("Principal - pose_now:",pose_now)
                 suc, p_target, id = ether.sendCMD(sock, "inverseKinematic", {"targetPose": pose_now})
                 suc, result, id = ether.sendCMD(sock, "tt_put_servo_joint_to_buf", {"targetPos": p_target})
                 time.sleep(0.02)
