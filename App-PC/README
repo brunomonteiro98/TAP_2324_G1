@@ -33,15 +33,13 @@ To-do:
     [] - modulo Wifi
     [] - ifs
 [] - Modulo Gravação
-    [] -
+    [] - Implementar vários ficheiros se quisermos (input nome ou caminho que vai entrar na função)
 [] - Modulo Play
     [] -
 [] - Arranjar maneira de quando ocorrer erro fazer reset no robot e continuar sem ter de reiniciar o python (... ocorreu
  um erro. pretende limpar o buffer e continuar? (s/n), por exemplo)
 
 Outros:
-VB22 - botão send ativa um timer que manda a cada segundo ... e desativa tbm.
-
 Gravação - Os programas seriam escritos num ficheiro e depois lia-se de um ficheiro. Fazer readline() send().
 Como receber e guardar?
     - input de gravação (keyboard pode ser g)

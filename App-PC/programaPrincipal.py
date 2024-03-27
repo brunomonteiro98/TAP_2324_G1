@@ -2,6 +2,7 @@
 import keyboard  # Biblioteca para manipulação de teclado
 import moduloEthernet as ether  # Biblioteca para comunicação Ethernet
 import moduloSerie as serie  # Biblioteca para comunicação serial
+import moduloGravação as gravacao  # Biblioteca para gravação de dados
 from moduloWifi import WiFiCommunicator  # Biblioteca para comunicação wifi
 import numpy  # Biblioteca para cálculos matemáticos
 import time  # Biblioteca para manipulação de tempo
@@ -93,8 +94,11 @@ def calculate_position(position: list, angle: list):
 
 
 if conSuc:  # Se a conexão for bem sucedida
-    stop = False
-    _continue = "s"
+    g = 0  # Variável para identificar se a gravação corre
+    stop = False  # Variável para identificar se o programa deve parar
+    _continue = "s"  # Variável para identificar se o programa deve continuar
+    firstrun = True  # Variável para identificar se é a primeira vez que o programa corre
+    firstrung = True  # Variável para identificar se é a primeira vez que o modulo gravação corre
     initialpoint = ([200, 0, 100, 0, 0, 0])  # posição inicial do robô!!!!!!!!!!!!!VERIFICAR!!!!!!!!!!!!!!!!!!!!!
     inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
     # Começa o main "loop"
@@ -130,13 +134,28 @@ if conSuc:  # Se a conexão for bem sucedida
                 suc, result, id = ether.sendCMD(sock, "moveByJoint", debug, {"targetPos": initialpoint,
                                                                              "speed": speed, "acc": 10, "dec": 10})
             while True:
+                # Print instructions if it is the first run
+                if firstrun:
+                    print("Para parar insira 'q'")
+                    print("Para gravar insira 'g'")
+                    firstrun = False
                 # Stop the robot if 'q' is pressed
-                print("Para parar insira 'q'")
                 if keyboard.is_pressed("q"):
                     suc, result, id = ether.sendCMD(sock, "stop")
                     suc, result, id = ether.sendCMD(sock, "tt_clear_servo_joint_buf", debug, {"clear": 0})
                     stop = True
                     break
+                # Start recording if 'g' is pressed
+                if keyboard.is_pressed("g"):
+                    print("Gravação iniciada")
+                    g = 1
+                # Record the sensor data
+                if g == 1:
+                    firstrung = gravacao.record(pose_now, firstrung)
+                # Stop recording if 'h' is pressed
+                if keyboard.is_pressed("h"):
+                    print("Gravação terminada")
+                    g = 0
                 # Get new position and angle based on sensor key value and add it to tt buff
                 x_now, y_now, z_now, rx_now, ry_now, rz_now = calculate_position([x_now, y_now, z_now],
                                                                                  [rx_now, ry_now, rz_now])
