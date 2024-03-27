@@ -95,6 +95,9 @@ def calculate_position(position: list, angle: list):
 
 if conSuc:  # Se a conexão for bem sucedida
     g = 0  # Variável para identificar se a gravação corre
+    p = 0  # Variável para identificar se o play corre
+    i = 0  # Variável para identificar a linha do ficheiro
+    fichlen = 0  # Variável para identificar o número de linhas do ficheiro
     stop = False  # Variável para identificar se o programa deve parar
     _continue = "s"  # Variável para identificar se o programa deve continuar
     firstrun = True  # Variável para identificar se é a primeira vez que o programa corre
@@ -138,6 +141,7 @@ if conSuc:  # Se a conexão for bem sucedida
                 if firstrun:
                     print("Para parar insira 'q'")
                     print("Para gravar insira 'g'")
+                    print("Para play insira 'p'")
                     firstrun = False
                 # Stop the robot if 'q' is pressed
                 if keyboard.is_pressed("q"):
@@ -151,17 +155,43 @@ if conSuc:  # Se a conexão for bem sucedida
                     g = 1
                 # Record the sensor data
                 if g == 1:
-                    firstrung = gravacao.record(pose_now, firstrung)
+                    firstrung = gravacao.record(pose_now, firstrung, debug)
                 # Stop recording if 'h' is pressed
                 if keyboard.is_pressed("h"):
                     print("Gravação terminada")
                     g = 0
-                # Get new position and angle based on sensor key value and add it to tt buff
-                x_now, y_now, z_now, rx_now, ry_now, rz_now = calculate_position([x_now, y_now, z_now],
-                                                                                 [rx_now, ry_now, rz_now])
-                pose_now = [x_now, y_now, z_now, rx_now, ry_now, rz_now]
-                if debug == "s":
-                    print("Principal - pose_now:", pose_now)
+                # Start playing if 'p' is pressed
+                if keyboard.is_pressed("p"):
+                    print("Play iniciado")
+                    p = 1
+                # Play the recorded data
+                if p == 1:
+                    if i < fichlen:
+                        pose_now, fichlen = gravacao.record(i, debug)
+                        i = i+1
+                    if i == fichlen:
+                        pose_now, fichlen = gravacao.record(i, debug)
+                        i = 0
+                    # Pause the play if 'space' is pressed
+                    if keyboard.is_pressed("space"):
+                        pause = True
+                        print("Play pausado para continuar insira 'space' novamente")
+                        while pause:
+                            if keyboard.is_pressed("space"):
+                                pause = False
+                                print("Play continuado")
+                # Stop recording if '+' is pressed
+                if keyboard.is_pressed("+"):
+                    print("Play terminado")
+                    p = 0
+                    i = 0
+                if p != 1:
+                    # Get new position and angle based on sensor key value and add it to tt buff
+                    x_now, y_now, z_now, rx_now, ry_now, rz_now = calculate_position([x_now, y_now, z_now],
+                                                                                     [rx_now, ry_now, rz_now])
+                    pose_now = [x_now, y_now, z_now, rx_now, ry_now, rz_now]
+                    if debug == "s":
+                        print("Principal - pose_now:", pose_now)
                 # Inverse kinematics and send to buffer
                 suc, p_target, id = ether.sendCMD(sock, "inverseKinematic", debug, {"targetPose": pose_now})
                 suc, result, id = ether.sendCMD(sock, "tt_put_servo_joint_to_buf", debug, {"targetPos": p_target})

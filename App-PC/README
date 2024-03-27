@@ -22,50 +22,25 @@ Modulo Ethernet:
     3- Ir ao Cmd dar ping ao ip do robot (para verificar se conectado)
     4- Inserir ip do robot no programa
 
+App de testes:
+    1- (Atenção velocidade do robot entre 5 e 50 mm/s (1 e 10 no incremento))
+
 To-do:
 [] - Ifs
-    [] - para parar e iniciar gravação na consola.
-    [] - para escolher programa gravado
-    [] - para parar e iniciar play
+    [] - para escolher programa gravado (se escolhermos fazer mais do que 1)
+    [] - para parar e iniciar play (se existir ficheiro)
 [] - Comentar, "limpar" e documentar (este doc) código
 [] - Calibrar aceleração e desaceleração no programaPrincipal mover para posição inicial
 [] - Testar
     [] - modulo Wifi
+    [] - modulo Gravação
+    [] - modulo Play
     [] - ifs
 [] - Modulo Gravação
     [] - Implementar vários ficheiros se quisermos (input nome ou caminho que vai entrar na função)
 [] - Modulo Play
-    [] -
+    [] - verificar o time.sleep() e ver se é necessário
 [] - Arranjar maneira de quando ocorrer erro fazer reset no robot e continuar sem ter de reiniciar o python (... ocorreu
  um erro. pretende limpar o buffer e continuar? (s/n), por exemplo)
 
 Outros:
-Gravação - Os programas seriam escritos num ficheiro e depois lia-se de um ficheiro. Fazer readline() send().
-Como receber e guardar?
-    - input de gravação (keyboard pode ser g)
-    - input do nome do ficheiro
-    - criar ficheiro e abrir
-    - ciclo while
-        - escrever v_origin (posição inicial) + \n
-        - escrever os incrementos + \n
-        - if input == stop ou pause
-            - escrever pose_now
-            - calcular a diferença entre pose_now e v_origin e escrever (Posições msm !!!!)
-Como parar?
-    - indicar nr de vezes (for)
-    - esperar por input (while)
-    - por erro (programa teria de ser novamento escrito)
-Como reiniciar?
-    - input
-Como fazer o loop de novo? (depende de como iniciamos (for, while)
-    - for - voltamos a dar input ao nr de vezes
-    - while - volta a correr (do inicio!!!)
-        - começar do inicio
-        - continuar de onde parou (criar variavel que guarda a posição onde parou)
-Como ler e enviar?
-    - ler o ficheiro linha a linha dentro de um for de 0 até ao nr de linhas
-    - incrementar o número da linha
-    - enviar a linha
-    - esperar um tempo (ou não dependendo se o enviar já tem um delay. Quase de certeza que temos de ter pq o esp tem delay)
-Como escolher o ficheiro?
-    - input do nome/número do ficheiro num certo diretório
