@@ -5,7 +5,7 @@ import json  # Importar a biblioteca json
 
 # Função para ler o ficheiro
 def play(i, debug):
-    ficheiro = open("ficheiro.txt", "r")  # Abrir o ficheiro
+    ficheiro = open("gravacao.txt", "r")  # Abrir o ficheiro
     rdata = ficheiro.readline()  # Ler a primeira linha
     jdata = json.loads(rdata)  # Converter a ‘string’ para uma lista
     fichlen = len(jdata)  # Guardar o número de linhas do ficheiro
@@ -20,3 +20,6 @@ def play(i, debug):
     time.sleep(0.02)  # Esperar 20ms
     # Output
     return data, fichlen
+
+if __name__ == "__main__":  # O código abaixo será executado apenas quando este arquivo for executado diretamente
+    pass  # Nada acontece

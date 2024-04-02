@@ -36,3 +36,6 @@ def record(pose_now, firstrung, debug):
             print("Play - rdata:", rdata)
             print("Play - jdata:", jdata)
         return
+
+if __name__ == "__main__":  # O código abaixo será executado apenas quando este arquivo for executado diretamente
+    pass  # Nada acontece
