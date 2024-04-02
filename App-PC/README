@@ -25,6 +25,7 @@ Modulo Ethernet:
 App de testes:
     1- (Atenção velocidade do robot entre 5 e 50 mm/s (1 e 10 no incremento))
 
+
 To-do:
 [] - Ifs
     [] - para escolher programa gravado (se escolhermos fazer mais do que 1)
@@ -44,3 +45,6 @@ To-do:
  um erro. pretende limpar o buffer e continuar? (s/n), por exemplo)
 
 Outros:
+    Ao definir a velocidade no python ter em atenção os valores que existem no robot(5, 15, 45, 75,100)
+    Tentar ver como parar o Debug
+    Verificar o porquê de sem enviar os dados aquilo começa andar
