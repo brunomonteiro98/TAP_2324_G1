@@ -102,7 +102,7 @@ if conSuc:  # Se a conexão for bem sucedida
     _continue = "s"  # Variável para identificar se o programa deve continuar
     firstrun = True  # Variável para identificar se é a primeira vez que o programa corre
     firstrung = True  # Variável para identificar se é a primeira vez que o modulo gravação corre
-    initialpoint = ([200, 0, 100, 0, 0, 0])  # posição inicial do robô!!!!!!!!!!!!!VERIFICAR!!!!!!!!!!!!!!!!!!!!!
+    initialpoint = ([-75, 300, 200, 0, 0, 0])  # posição inicial do robô!!!!!!!!!!!!!VERIFICAR!!!!!!!!!!!!!!!!!!!!!
     inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
     # Começa o main "loop"
     while True:
