@@ -10,7 +10,7 @@ global portaSerie
 def connect_serial_port(portName):
     global portaSerie
     portaSerie = serial.Serial(portName)  # Cria o objeto da porta serial
-    portaSerie.baudrate = 9600  # Configura a taxa de transmissão para 9600
+    portaSerie.baudrate = 115200  # Configura a taxa de transmissão para 9600
     portaSerie.bytesize = 8  # Número de bits de dados = 8
     portaSerie.parity = 'N'  # Sem paridade
     portaSerie.stopbits = 1  # Número de stopbits = 1.

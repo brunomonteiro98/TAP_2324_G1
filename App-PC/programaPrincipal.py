@@ -4,7 +4,6 @@ import moduloEthernet as ether  # Biblioteca para comunicação Ethernet
 import moduloSerie as serie  # Biblioteca para comunicação serial
 import moduloGravação as gravacao  # Biblioteca para gravação de dados
 from moduloWifi import WiFiCommunicator  # Biblioteca para comunicação wifi
-import numpy  # Biblioteca para cálculos matemáticos
 import time  # Biblioteca para manipulação de tempo
 
 # ==================================================================================================================== #
@@ -37,6 +36,7 @@ elif speed < 0.05:  # Se a velocidade for menor que 0%, define a velocidade como
 # Debug
 debug = input("Debug? (s/n) - ")
 
+
 # ==================================================================================================================== #
 
 
@@ -44,7 +44,6 @@ debug = input("Debug? (s/n) - ")
 # position: lista com as posições atuais
 # angle: lista com os ângulos atuais
 def calculate_position(position: list, angle: list):
-
     # Ler os dados do sensor
     data = []  # Inicializar a lista de dados
     if sow == "s":  # Se a conexão for por porta serial
@@ -65,20 +64,20 @@ def calculate_position(position: list, angle: list):
 
     # Segurança para não sair do espaço de trabalho (posições)
     # Segurança em X
-    if new_position_x <= -355:
-        new_position_x = -355
-    if new_position_x >= 185:
-        new_position_x = 185
+    '''if new_position_x <= ---:
+        new_position_x = ---
+    if new_position_x >= ---:
+        new_position_x = ---
     # Segurança em Y
-    if new_position_y <= 365:
-        new_position_y = 365
-    if new_position_y >= 375:
-        new_position_y = 375
+    if new_position_y <= ---:
+        new_position_y = ---
+    if new_position_y >= ---:
+        new_position_y = ---
     # Segurança em Z
-    if new_position_z <= 732:
-        new_position_z = 732
-    if new_position_z >= 740:
-        new_position_z = 740
+    if new_position_z <= ---:
+        new_position_z = ---
+    if new_position_z >= ---:
+        new_position_z = ---'''
 
     # Calcular o novo ângulo
     new_angle_x = angle[0] + gx
@@ -87,15 +86,15 @@ def calculate_position(position: list, angle: list):
 
     # Segurança para não sair do espaço de trabalho (ângulos)
     # Segurança em Y
-    '''if new_angle_y <= 0:
-        new_angle_y = 0
-    if new_angle_y >= numpy.pi / 2:
-        new_angle_y = numpy.pi / 2
+    '''if new_angle_y <= ---:
+        new_angle_y = ---
+    if new_angle_y >= ---:
+        new_angle_y = ---
     # Segurança em Z
-    if new_angle_z <= -numpy.pi / 2:
-        new_angle_z = -numpy.pi / 2
-    if new_angle_z >= numpy.pi / 2:
-        new_angle_z = numpy.pi / 2 '''
+    if new_angle_z <= ---:
+        new_angle_z = ---
+    if new_angle_z >= ---:
+        new_angle_z = --- '''
 
     # Debug
     if debug == "s":
@@ -134,10 +133,13 @@ if conSuc:  # Se a conexão for bem sucedida
             else:
                 firstrun = True
                 stop = False
-        time.sleep(0.01)
+
+        # Sets the coordinate system
+        suc, result, id = ether.sendCMD(sock, "setCurrentCoord", debug, {"coord_mode": 2})
 
         # Obtain robot's original position and joint angle
-        suc, v_origin, id = ether.sendCMD(sock, "get_tcp_pose", debug)  # Get robot's current pose (!!!tool!!!)
+        suc, v_origin, id = ether.sendCMD(sock, "get_tcp_pose", debug, {"unit_type": 0})  # Get robot's
+        # current pose (!!!tool!!!). Rotations in degrees.
         x_now = v_origin[0]
         y_now = v_origin[1]
         z_now = v_origin[2]
@@ -152,7 +154,7 @@ if conSuc:  # Se a conexão for bem sucedida
 
         # Initialize transparent transmission
         suc, result, id = ether.sendCMD(sock, "transparent_transmission_init",
-                                        debug, {"lookahead": 200, "t": 20, "smoothness": 0.1})
+                                        debug, {"lookahead": 500, "t": 2, "smoothness": 0.1, "response_enable": 1})
 
         # Set robot's speed
         suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})
@@ -233,7 +235,7 @@ if conSuc:  # Se a conexão for bem sucedida
                     print("Principal - pose_now:", pose_now)
 
             # Inverse kinematics and send to buffer
-            suc, p_target, id = ether.sendCMD(sock, "inverseKinematic", debug, {"targetPose": pose_now})
+            suc, p_target, id = ether.sendCMD(sock, "inverseKinematic", debug, {"targetPose": pose_now, "unit_type": 0})
             suc, result, id = ether.sendCMD(sock, "tt_put_servo_joint_to_buf", debug, {"targetPos": p_target})
 
             # Debug
@@ -241,11 +243,8 @@ if conSuc:  # Se a conexão for bem sucedida
                 print("Principal - p_target:", p_target)
                 print("Principal - result:", result)
 
-            time.sleep(0.02)
-
         # Stop the robot
         suc, result, id = ether.sendCMD(sock, "stop")
-        time.sleep(0.01)
 
 # Desconectar o controlador, a porta serial e o comunicador wifi
 ether.disconnectETController(sock)
