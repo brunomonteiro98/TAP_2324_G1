@@ -1,9 +1,9 @@
 # Importação das bibliotecas necessárias
 import json  # Biblioteca para manipulação de arquivos json
-import socket  # Biblioteca para comunicação por socket
-import sys
+import socket  # Biblioteca para comunicação por ‘socket’
+import sys # Biblioteca para manipulação do sistema
 
-import keyboard
+# ==================================================================================================================== #
 
 
 # Função para conectar ao controlador por Ethernet
@@ -15,20 +15,24 @@ def connectETController(ip, port=8055):  #
     sock.settimeout(2)  # Define o timeout do socket
     try:  # Tenta conectar ao controlador
         sock.connect((ip, port))  # Conecta ao controlador
-        return (True, sock)  # Retorna sucesso e o socket
+        return True, sock  # Retorna sucesso e o socket
     except Exception as e:  # Se houver erro na conexão, retorna o erro
         sock.close()  # Fecha o socket
-        return (False, None)  # Retorna erro
+        return False, None  # Retorna erro
+
+# ==================================================================================================================== #
 
 
 # Função para desconectar ao controlador por Ethernet
 # sock: socket de comunicação com o controlador
 def disconnectETController(sock):
-    if (sock):  # Se o socket estiver aberto, fecha o socket
+    if sock:  # Se o socket estiver aberto, fecha o socket
         sock.close()  # Fecha o socket
         sock = None
-    else:  # Se o socket já estiver fechado, não faz nada
+    else:  # Se o ‘socket’ já estiver fechado, não faz nada
         sock = None
+
+# ==================================================================================================================== #
 
 
 # Função para enviar, receber e processar mensagens do controlador
@@ -40,10 +44,10 @@ def disconnectETController(sock):
 # ret: reposta do controlador
 # jdata: mensagem recebida do controlador
 def sendCMD(sock, cmd, debug="n", params=None, id=1) -> object:
-    if not params:  # Se não houver parâmetros, envia uma string vazia
+    if not params:  # Se não houver parâmetros, envia uma ‘string’ vazia
         params = []  # Cria uma lista vazia
-    else:  # Se houver parâmetros, converte para string
-        params = json.dumps(params)  # Converte os parâmetros para string
+    else:  # Se houver parâmetros, converte para ‘string’
+        params = json.dumps(params)  # Converte os parâmetros para ‘string’
     sendStr = ("{{\"method\":\"{0}\",\"params\":{1},\"jsonrpc\":\"2.0\",\"id\":{2}}}".format
                (cmd, params, id) + "\n")  # Cria a mensagem a ser enviada
     try:  # Tenta enviar a mensagem
@@ -52,8 +56,6 @@ def sendCMD(sock, cmd, debug="n", params=None, id=1) -> object:
         jdata = json.loads(str(ret, "utf-8"))  # Converte a resposta para json
         if debug == "s":
             print("Ethernet - sendStr:", sendStr)  # Imprime a mensagem enviada no terminal para debug
-            # print("Ethernet - ret:", ret)  # Imprime a mensagem recebida no terminal para debug
-            # print(jdata)  # Imprime a mensagem recebida no terminal para debug
         if "result" in jdata.keys():  # Se houver resultado, retorna o resultado
             if debug == "s":
                 print("Ethernet - jdata:", jdata["result"], jdata["id"])  # Imprime o resultado no terminal para debug
@@ -81,6 +83,8 @@ def sendCMD(sock, cmd, debug="n", params=None, id=1) -> object:
             return False, None, None  # Retorna a mensagem recebida
     except Exception as e:  # Se houver erro na comunicação, retorna o erro
         return False, None, None  # Retorna o erro
+
+# ==================================================================================================================== #
 
 
 if __name__ == "__main__":  # O código abaixo será executado apenas quando este arquivo for executado diretamente

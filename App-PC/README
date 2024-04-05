@@ -27,7 +27,7 @@ App de testes:
 
 
 To-do:
-[] - Redifinir segurança angulos. Testar sem essa segurança. Verificar se é angulos ou radianos o mesmo para o enviar e
+!!!!![] - Redifinir segurança angulos. Testar sem essa segurança. Verificar se é angulos ou radianos o mesmo para o enviar e
 receber do inverse kinetamitcs
 [] - Ifs
     [] - para escolher programa gravado (se escolhermos fazer mais do que 1)

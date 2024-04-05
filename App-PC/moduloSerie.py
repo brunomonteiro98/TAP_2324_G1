@@ -2,6 +2,7 @@
 import json  # Biblioteca para manipulação de arquivos json
 import serial  # Biblioteca para comunicação serial
 
+# Definição da variável global
 global portaSerie
 
 
@@ -25,8 +26,6 @@ def close_serial_port():
 # Função para ler os dados disponíveis na porta serial
 def read_serial_data(debug="n"):  # Função para ler os dados disponíveis na porta serial
     data = portaSerie.readline()  # Lê a linha disponível
-    # if debug == "s":
-    # print("Serie - data:", data)  # Imprime a mensagem recebida no terminal para debug
     jdata = json.loads(str(data, 'utf-8'))  # Converte a resposta para json
     data = [(jdata["Item1"]), (jdata["Item2"]), (jdata["Item3"]), (jdata["Item4"]),
             (jdata["Item5"]), (jdata["Item6"])]
