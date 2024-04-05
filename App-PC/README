@@ -39,6 +39,9 @@ receber do inverse kinetamitcs
     [] - modulo Gravação
     [] - modulo Play
     [] - ifs
+        [] - para ir para posição inicial
+        [] - para para e iniciar play
+        [] - para parar o programa
 [] - Modulo Gravação
     [] - Implementar vários ficheiros se quisermos (input nome ou caminho que vai entrar na função)
 [] - Modulo Play
@@ -47,6 +50,3 @@ receber do inverse kinetamitcs
  um erro. pretende limpar o buffer e continuar? (s/n), por exemplo)
 
 Outros:
-    Ao definir a velocidade no python ter em atenção os valores que existem no robot(5, 15, 45, 75,100)
-    Tentar ver como parar o Debug
-    Verificar o porquê de sem enviar os dados aquilo começa andar
