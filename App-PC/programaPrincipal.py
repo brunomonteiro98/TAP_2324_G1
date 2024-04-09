@@ -127,12 +127,12 @@ if conSuc:  # Se a conexão for bem sucedida
         # Pergunta se o utilizador quer continuar após parar (não é necessário na primeira vez)
         if stop:
             continua = input("Para continuar insira 's' caso contrário o programa para - ")
-            inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
-            if continua != "s":
-                break
-            else:
+            if continua == "s":
                 firstrun = True
                 stop = False
+            else:
+                break
+            inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
 
         # Sets the coordinate system
         suc, result, id = ether.sendCMD(sock, "setCurrentCoord", debug, {"coord_mode": 2})
@@ -153,18 +153,36 @@ if conSuc:  # Se a conexão for bem sucedida
             print("Principal - v_origin:", v_origin)
 
         # Initialize transparent transmission
-        suc, result, id = ether.sendCMD(sock, "transparent_transmission_init",
-                                        debug, {"lookahead": 500, "t": 2, "smoothness": 0.1, "response_enable": 1})
-
+        suc, result, id = ether.sendCMD(sock,"get_transparent_transmission_state")
+        # Try again after cleaning alarm
+        if not suc:
+            suc, result, id = ether.sendCMD(sock, "get_transparent_transmission_state")
+        if result == 0:
+            suc, result, id = ether.sendCMD(sock, "transparent_transmission_init",
+                                            debug, {"lookahead": 500, "t": 2, "smoothness": 0.1, "response_enable": 1})
+            # Try again after cleaning alarm
+            if not suc:
+                suc, result, id = ether.sendCMD(sock, "transparent_transmission_init",
+                                                debug, {"lookahead": 500, "t": 2, "smoothness": 0.1, "response_enable": 1})
         # Set robot's speed
         suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})
+        # Try again after cleaning alarm
+        if not suc:
+            suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})
 
         # Move robot to initialpos if requested
         if inicialpos == "s":
             suc, result, id = ether.sendCMD(sock, "moveByJoint", debug, {"targetPos": initialpoint,
                                                                          "speed": speed, "acc": 10, "dec": 10})
+            # Try again after cleaning alarm
+            if not suc:
+                suc, result, id = ether.sendCMD(sock, "moveByJoint", debug, {"targetPos": initialpoint,
+                                                                             "speed": speed, "acc": 10, "dec": 10})
             while True:
                 suc, result, id = ether.sendCMD(sock, "getRobotState")
+                # Try again after cleaning alarm
+                if not suc:
+                    suc, result, id = ether.sendCMD(sock, "getRobotState")
                 if result == 0:
                     break
 
@@ -179,7 +197,13 @@ if conSuc:  # Se a conexão for bem sucedida
             # Stop the robot if 'q' is pressed
             if keyboard.is_pressed("q"):
                 suc, result, id = ether.sendCMD(sock, "stop")
+                # Try again after cleaning alarm
+                if not suc:
+                    suc, result, id = ether.sendCMD(sock, "stop")
                 suc, result, id = ether.sendCMD(sock, "tt_clear_servo_joint_buf", debug, {"clear": 0})
+                # Try again after cleaning alarm
+                if not suc:
+                    suc, result, id = ether.sendCMD(sock, "tt_clear_servo_joint_buf", debug, {"clear": 0})
                 stop = True
                 break
 
@@ -236,7 +260,14 @@ if conSuc:  # Se a conexão for bem sucedida
 
             # Inverse kinematics and send to buffer
             suc, p_target, id = ether.sendCMD(sock, "inverseKinematic", debug, {"targetPose": pose_now, "unit_type": 0})
+            # Try again after cleaning alarm
+            if not suc:
+                suc, p_target, id = ether.sendCMD(sock, "inverseKinematic", debug,
+                                                  {"targetPose": pose_now, "unit_type": 0})
             suc, result, id = ether.sendCMD(sock, "tt_put_servo_joint_to_buf", debug, {"targetPos": p_target})
+            # Try again after cleaning alarm
+            if not suc:
+                suc, result, id = ether.sendCMD(sock, "tt_put_servo_joint_to_buf", debug, {"targetPos": p_target})
 
             # Debug
             if debug == "s":
@@ -245,9 +276,15 @@ if conSuc:  # Se a conexão for bem sucedida
 
         # Stop the robot
         suc, result, id = ether.sendCMD(sock, "stop")
+        # Try again after cleaning alarm
+        if not suc:
+            suc, result, id = ether.sendCMD(sock, "stop")
 
 # Desconectar o controlador, a porta serial e o comunicador wifi
 ether.disconnectETController(sock)
-serie.close_serial_port()
-communicator.destroy()
+match sow:
+    case "s":
+        serie.close_serial_port()
+    case "w":
+        communicator.destroy()
 print("Programa terminado")

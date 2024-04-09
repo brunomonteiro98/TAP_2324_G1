@@ -1,7 +1,7 @@
 # Importação das bibliotecas necessárias
 import json  # Biblioteca para manipulação de arquivos json
 import socket  # Biblioteca para comunicação por ‘socket’
-import sys # Biblioteca para manipulação do sistema
+import sys  # Biblioteca para manipulação do sistema
 
 # ==================================================================================================================== #
 
@@ -63,21 +63,49 @@ def sendCMD(sock, cmd, debug="n", params=None, id=1) -> object:
         elif "error" in jdata.keys():  # Se houver erro, retorna o erro
             if debug == "s":
                 print("Ethernet - jdata:", jdata['error']['message'])  # Imprime a mensagem de erro
-                continuar = input("Ocorreu um erro. Pretende limpar o erro e continuar o programa? (s/n) -")
-                if continuar != "s":
-                    sys.exit()
-                cmd = "clearAlarm"
-                params = None
-                id = 1
-                sendStr = ("{{\"method\":\"{0}\",\"params\":{1},\"jsonrpc\":\"2.0\",\"id\":{2}}}".format
-                           (cmd, params, id) + "\n")  # Cria a mensagem a ser enviada
-                sock.sendall(bytes(sendStr, "utf-8"))  # Envia a mensagem
-                ret = sock.recv(1024)
-                jdata = json.loads(str(ret, "utf-8"))
-                if not jdata["result"]:
-                    print("Erro ao limpar alarme. Programa parou.")
-                    sys.exit()
-                print("Alarme limpo")
+            continuar = input("Ocorreu um erro. Pretende limpar o erro e continuar o programa? (s/n) -")
+            if continuar != "s":
+                sys.exit()
+            cmd = "clearAlarm"
+            params = None
+            id = 1
+            sendStr = ("{{\"method\":\"{0}\",\"params\":{1},\"jsonrpc\":\"2.0\",\"id\":{2}}}".format
+                       (cmd, params, id) + "\n")  # Cria a mensagem a ser enviada
+            sock.sendall(bytes(sendStr, "utf-8"))  # Envia a mensagem
+            ret = sock.recv(1024)
+            jdata = json.loads(str(ret, "utf-8"))
+            if not jdata["result"]:
+                print("Erro ao limpar alarme. Programa parou.")
+                sys.exit()
+            print("Alarme limpo")
+            cmd = "pause_trajectory"
+            sendStr = ("{{\"method\":\"{0}\",\"params\":{1},\"jsonrpc\":\"2.0\",\"id\":{2}}}".format
+            (cmd, params, id) + "\n")  # Cria a mensagem a ser enviada
+            sock.sendall(bytes(sendStr, "utf-8"))  # Envia a mensagem
+            ret = sock.recv(1024)
+            jdata = json.loads(str(ret, "utf-8"))
+            if "result" in jdata.keys():  # Se houver resultado, retorna o resultado
+                if debug == "s":
+                    print("Ethernet - jdata:", jdata["result"])  # Imprime o resultado para debug
+            cmd = "stop"
+            sendStr = ("{{\"method\":\"{0}\",\"params\":{1},\"jsonrpc\":\"2.0\",\"id\":{2}}}".format
+                       (cmd, params, id) + "\n")  # Cria a mensagem a ser enviada
+            sock.sendall(bytes(sendStr, "utf-8"))  # Envia a mensagem
+            ret = sock.recv(1024)
+            jdata = json.loads(str(ret, "utf-8"))
+            if "result" in jdata.keys():  # Se houver resultado, retorna o resultado
+                if debug == "s":
+                    print("Ethernet - jdata:", jdata["result"])  # Imprime o resultado para debug
+            cmd = "tt_clear_servo_joint_buf"
+            params = {"clear": 0}
+            sendStr = ("{{\"method\":\"{0}\",\"params\":{1},\"jsonrpc\":\"2.0\",\"id\":{2}}}".format
+                       (cmd, params, id) + "\n")  # Cria a mensagem a ser enviada
+            sock.sendall(bytes(sendStr, "utf-8"))  # Envia a mensagem
+            ret = sock.recv(1024)
+            jdata = json.loads(str(ret, "utf-8"))
+            if "result" in jdata.keys():  # Se houver resultado, retorna o resultado
+                if debug == "s":
+                    print("Ethernet - jdata:", jdata["result"])  # Imprime o resultado para debug
             return False, json.loads(jdata["error"]), jdata["id"]  # Retorna o erro
         else:  # Se não houver resultado nem erro, retorna a mensagem recebida
             return False, None, None  # Retorna a mensagem recebida

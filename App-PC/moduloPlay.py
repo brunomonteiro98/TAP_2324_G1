@@ -9,7 +9,7 @@ def play(i, debug):
     rdata = ficheiro.readline()  # Ler a primeira linha
     jdata = json.loads(rdata)  # Converter a ‘string’ para uma lista
     fichlen = len(jdata)  # Guardar o número de linhas do ficheiro
-    data = jdata[i]  # Ler a linha i
+    data = jdata[i+6]  # Ler a linha i+1 para evitar os 1º 6 valores
     ficheiro.close()  # Fechar o ficheiro
     # Debug (se ativado)
     if debug == "s":

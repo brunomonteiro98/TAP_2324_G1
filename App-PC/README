@@ -44,6 +44,9 @@ receber do inverse kinetamitcs
         [] - para parar o programa
 [] - Modulo Gravação
     [] - Implementar vários ficheiros se quisermos (input nome ou caminho que vai entrar na função)
+    [] - Verificar se queremos limpar o ficheiro e colocar [] logo para meter dentro?? Testar
+    !!![] Colocar todos os possíveis erros no clean error e verificar se o clear alarm fica antes ou depiois. Verificar o debug.
+    Dever ser depois!!!! meter clear alarm antes e tentar corrigir.
 [] - Modulo Play
     [] - verificar o time.sleep() e ver se é necessário
 [] - Arranjar maneira de quando ocorrer erro fazer reset no robot e continuar sem ter de reiniciar o python (... ocorreu

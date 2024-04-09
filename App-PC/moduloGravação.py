@@ -21,21 +21,22 @@ def record(pose_now, firstrung, debug):
         jdata = json.loads(rdata)  # Converter a ‘string’ para uma lista
         # Debug (se ativado)
         if debug == "s":
-            print("Play - jdata:", jdata)
+            print("Gravação - jdata:", jdata)
         ficheiro.close()  # Fechar o ficheiro
         ficheiro = open("gravacao.txt", "w")  # Abrir o ficheiro
         jdata = jdata + [pose_now]  # Adicionar a nova pose !!!linha super importante!!!
         # Debug (se ativado)
         if debug == "s":
-            print("Play - jdata:", jdata)
+            print("Gravação - jdata:", jdata)
         jdata = json.dumps(jdata)  # Converter a lista para uma ‘string’
         ficheiro.write(jdata)  # Escrever a nova pose
         ficheiro.close()  # Fechar o ficheiro
         # Debug (se ativado)
         if debug == "s":
-            print("Play - rdata:", rdata)
-            print("Play - jdata:", jdata)
+            print("Gravação - rdata:", rdata)
+            print("Gravação - jdata:", jdata)
         return
+
 
 if __name__ == "__main__":  # O código abaixo será executado apenas quando este arquivo for executado diretamente
     pass  # Nada acontece
