@@ -22,34 +22,44 @@ Modulo Ethernet:
     3- Ir ao Cmd dar ping ao ip do robot (para verificar se conectado)
     4- Inserir ip do robot no programa
 
-App de testes:
-    1- (Atenção velocidade do robot entre 5 e 50 mm/s (1 e 10 no incremento))
-
-
 To-do:
-!!!!![] - Redifinir segurança angulos. Testar sem essa segurança. Verificar se é angulos ou radianos o mesmo para o enviar e
-receber do inverse kinetamitcs
-[] - Ifs
-    [] - para escolher programa gravado (se escolhermos fazer mais do que 1)
-    [] - para parar e iniciar play (se existir ficheiro)
-[] - Comentar, "limpar" e documentar (este doc) código
-[] - Calibrar aceleração e desaceleração no programaPrincipal mover para posição inicial
-[] - Testar
+
+[] Outros
+    [] Colocar no git app testes atualizada.
+
+[] Implementar
+    [] - Ifs
+        [] - para escolher programa gravado (se escolhermos fazer mais do que 1)
+        [] - para parar e iniciar play (se existir ficheiro)
+    [] - Modulo Gravação
+        [] - Implementar vários ficheiros se quisermos (input nome ou caminho que vai entrar na função)
+    [] - Redifinir seguranças?
+    [] Colocar todos os possíveis erros no clean error
+
+[] Testar
     [] - modulo Wifi
     [] - modulo Gravação
     [] - modulo Play
-    [] - ifs
+    [] - Ifs
         [] - para ir para posição inicial
         [] - para para e iniciar play
         [] - para parar o programa
-[] - Modulo Gravação
-    [] - Implementar vários ficheiros se quisermos (input nome ou caminho que vai entrar na função)
-    [] - Verificar se queremos limpar o ficheiro e colocar [] logo para meter dentro?? Testar
-    !!![] Colocar todos os possíveis erros no clean error e verificar se o clear alarm fica antes ou depiois. Verificar o debug.
-    Dever ser depois!!!! meter clear alarm antes e tentar corrigir.
-[] - Modulo Play
-    [] - verificar o time.sleep() e ver se é necessário
-[] - Arranjar maneira de quando ocorrer erro fazer reset no robot e continuar sem ter de reiniciar o python (... ocorreu
- um erro. pretende limpar o buffer e continuar? (s/n), por exemplo)
 
-Outros:
+[] Verificar e Melhorar
+    [] Fazer check list do que está visto e o q não.
+    [] Ler bem o código
+    [] Tentar simplificar o código
+    [] Passar para os módulos o mais que conseguir para simplificar o main.
+    [] - Comentar, "limpar" e documentar (este doc) código
+    [] - Calibrar aceleração e desaceleração no programaPrincipal mover para posição inicial
+    [] Verificar módulo gravação e play o que gravam e leem. Como voltar à posição inicial? Tirar a posição do ficheirp
+    gravação no inicio. Criar outro ficheiro com essa posição e mandar para lá no inicio do ciclo (no fim tbm dá e é mais
+    fácil de implementar mas não é tão bom pq pode não estar na posição inicial pretendida. A não ser que no inicio da
+    gravação seja sempre a posição de reset e depois é só mandar para lá)? Supostamente já tinhamos verificado q não era
+    preciso. Os incrementos bastavam. Isto será pq o que gravamos ser depois do inverse kinematics ou assim? Verificar.
+    Se for assim é mt inteligente e isto é desnecessário pq já são posições de juntas.
+    [] - Modulo Play
+        [] - verificar o time.sleep() / time.wait() e ver se é necessário
+
+Comentários
+- Para não haver delay: Tim send = 10x t sampling do robot
