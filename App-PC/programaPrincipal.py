@@ -4,7 +4,6 @@ import moduloEthernet as ether  # Biblioteca para comunicação Ethernet
 import moduloSerie as serie  # Biblioteca para comunicação serial
 import moduloGravação as gravacao  # Biblioteca para gravação de dados
 from moduloWifi import WiFiCommunicator  # Biblioteca para comunicação wifi
-import time  # Biblioteca para manipulação de tempo
 
 # ==================================================================================================================== #
 
