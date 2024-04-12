@@ -25,9 +25,13 @@ Modulo Ethernet:
 To-do:
 
 [] Implementar
+    ![] - Corrigir o pretende continuar? depois do "q" que aparece 2 vezes.
+    ![] - Corrigir o reset da posição que corre x=vorigin antes do getTcppose que vem antes
     [] - Ifs
         [] - para escolher programa gravado (se escolhermos fazer mais do que 1)
         [] - para parar e iniciar play (se existir ficheiro)
+        ![] - Verifica se está na posição de reset e se já estiver não reseta a posição
+        ![] - Verificar os len/fichlen para vir como int e não tuple
     [] - Modulo Gravação
         [] - Implementar vários ficheiros se quisermos (input nome ou caminho que vai entrar na função)
     [] - Redifinir seguranças?
@@ -65,4 +69,5 @@ To-do:
         [] - verificar o time.sleep() / time.wait() e ver se é necessário
 
 Comentários
-- Para não haver delay: Tim send = 10x t sampling do robot
+- Para não haver delay: Tim send = 50x t sampling do robot
+- Delay não depende da velocidade do robô!

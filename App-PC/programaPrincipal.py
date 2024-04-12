@@ -3,13 +3,14 @@ import keyboard  # Biblioteca para manipulação de teclado
 import moduloEthernet as ether  # Biblioteca para comunicação Ethernet
 import moduloSerie as serie  # Biblioteca para comunicação serial
 import moduloGravação as gravacao  # Biblioteca para gravação de dados
+import moduloPlay as play  # Biblioteca para play dos dados
 from moduloWifi import WiFiCommunicator  # Biblioteca para comunicação wifi
 
 # ==================================================================================================================== #
 
 # Conexões
 # Conectar ao ESP32 por porta serial ou wifi
-# Input com respetiva segurança
+# ‘Input’ com respetiva segurança
 while True:
     sow = input("Conectar ao ESP32 por porta serial ou por wifi? (s/w) - ")
     if sow == "s" or sow == "w":
@@ -39,13 +40,14 @@ elif speed < 0.05:  # Se a velocidade for menor que 0%, define a velocidade como
 # ==================================================================================================================== #
 
 # Debug
-# Input com respetiva segurança
+# ‘Input’ com respetiva segurança
 while True:
     debug = input("Debug? (s/n) - ")
     if debug == "s" or debug == "n":
         break
     else:
         print("Insira s ou n, idiota!")
+
 
 # ==================================================================================================================== #
 
@@ -122,14 +124,14 @@ if conSuc:  # Se a conexão for bem sucedida
     # Definição de variáveis
     g = 0  # Variável para identificar se a gravação corre
     p = 0  # Variável para identificar se o play corre
-    i = 0  # Variável para identificar a linha do ficheiro
+    i = 6  # Variável para identificar a linha do ficheiro
     fichlen = 0  # Variável para identificar o número de linhas do ficheiro
     stop = False  # Variável para identificar se o programa deve parar
-    continua = "s"  # Variável para identificar se o programa deve continuar
+    continua = True  # Variável para identificar se o programa deve continuar
     firstrun = True  # Variável para identificar se é a primeira vez que o programa corre
     firstrung = True  # Variável para identificar se é a primeira vez que o modulo gravação corre
     initialpoint = ([90, -100, 110, -190, 85, 0])  # posição inicial do robô (em joint angles)
-    # Input com respetiva segurança
+    # ‘Input’ com respetiva segurança
     while True:
         inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
         if inicialpos == "s" or inicialpos == "n":
@@ -142,7 +144,7 @@ if conSuc:  # Se a conexão for bem sucedida
 
         # Pergunta se o utilizador quer continuar após parar (não é necessário na primeira vez)
         if stop:
-            # Input com respetiva segurança
+            # ‘Input’ com respetiva segurança
             while True:
                 continua = input("Pretende continuar (s/n)? - ")
                 if continua == "s" or continua == "n":
@@ -154,7 +156,7 @@ if conSuc:  # Se a conexão for bem sucedida
                 stop = False
             else:
                 break
-            # Input com respetiva segurança
+            # ‘Input’ com respetiva segurança
             while True:
                 inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
                 if inicialpos == "s" or inicialpos == "n":
@@ -202,17 +204,18 @@ if conSuc:  # Se a conexão for bem sucedida
             print("Principal - v_origin:", v_origin)
 
         # Initialize transparent transmission
-        suc, result, id = ether.sendCMD(sock,"get_transparent_transmission_state")
+        suc, result, id = ether.sendCMD(sock, "get_transparent_transmission_state")
         # Try again after cleaning alarm
         if not suc:
             suc, result, id = ether.sendCMD(sock, "get_transparent_transmission_state")
         if result == 0:
             suc, result, id = ether.sendCMD(sock, "transparent_transmission_init",
-                                            debug, {"lookahead": 500, "t": 2, "smoothness": 0.1, "response_enable": 1})
+                                            debug, {"lookahead": 200, "t": 2, "smoothness": 1, "response_enable": 1})
             # Try again after cleaning alarm
             if not suc:
                 suc, result, id = ether.sendCMD(sock, "transparent_transmission_init",
-                                                debug, {"lookahead": 500, "t": 2, "smoothness": 0.1, "response_enable": 1})
+                                                debug,
+                                                {"lookahead": 200, "t": 2, "smoothness": 1, "response_enable": 1})
         # Set robot's speed
         suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})
         # Try again after cleaning alarm
@@ -259,28 +262,11 @@ if conSuc:  # Se a conexão for bem sucedida
                 print("Play iniciado")
                 p = 1
 
-            # Play the recorded data
-            if p == 1:
-                if i < fichlen:
-                    pose_now, fichlen = gravacao.record(i, debug)
-                    i = i + 1
-                if i == fichlen:
-                    pose_now, fichlen = gravacao.record(i, debug)
-                    i = 0
-                # Pause the play if 'space' is pressed
-                if keyboard.is_pressed("space"):
-                    pause = True
-                    print("Play pausado para continuar insira 'space' novamente")
-                    while pause:
-                        if keyboard.is_pressed("space"):
-                            pause = False
-                            print("Play continuado")
-
             # Stop recording if '+' is pressed
             if keyboard.is_pressed("+"):
                 print("Play terminado")
                 p = 0
-                i = 0
+                i = 6
 
             # If the program is not stopped, recording or playing, get new position and angle based on sensor key value
             if p != 1:
@@ -290,6 +276,24 @@ if conSuc:  # Se a conexão for bem sucedida
                 pose_now = [x_now, y_now, z_now, rx_now, ry_now, rz_now]
                 if debug == "s":
                     print("Principal - pose_now:", pose_now)
+
+            # Play the recorded data
+            if p == 1:
+                fichlen = play.play(i, debug)
+                if i < fichlen:
+                    pose_now, fichlen = play.play(i, debug)
+                    i = i + 1
+                if i == fichlen:
+                    pose_now, fichlen = play.play(i, debug)
+                    i = 6
+                # Pause the play if 'space' is pressed
+                if keyboard.is_pressed("space"):
+                    pause = True
+                    print("Play pausado para continuar insira 'space' novamente")
+                    while pause:
+                        if keyboard.is_pressed("space"):
+                            pause = False
+                            print("Play continuado")
 
             # Inverse kinematics and send to buffer
             suc, p_target, id = ether.sendCMD(sock, "inverseKinematic", debug, {"targetPose": pose_now, "unit_type": 0})
