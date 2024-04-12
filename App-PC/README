@@ -24,8 +24,8 @@ Modulo Ethernet:
 
 To-do:
 
-[] Outros
-    [] Colocar no git app testes atualizada.
+[X] Outros
+    [X] Colocar no git app testes atualizada.
 
 [] Implementar
     [] - Ifs
@@ -34,8 +34,8 @@ To-do:
     [] - Modulo Gravação
         [] - Implementar vários ficheiros se quisermos (input nome ou caminho que vai entrar na função)
     [] - Redifinir seguranças?
-    [] - Colocar todos os possíveis erros no clean error
-    [] - Seguranças para os inputs
+    [X] - Colocar todos os possíveis erros no clean error
+    [X] - Seguranças para os inputs
 
 [] Testar
     [] - modulo Wifi
@@ -45,17 +45,17 @@ To-do:
         [] - Verificar tempos
         [] - Verificar play pause
     [] - Ifs
-        [] - para ir para posição inicial
+        [X] - para ir para posição inicial
         [] - para para e iniciar play
-        [] - para parar o programa
-        [] - limpar erro
+        [X] - para parar o programa
+        [X] - limpar erro
     [] - Se velocidade do robot influencia delay
-    [] - Verificar o shutdown
+    [X] - Verificar o shutdown
     [] - Incrementos de rotação
-    [] - Testar seguranças inputs
+    [X] - Testar seguranças inputs
 
 [] Verificar e Melhorar
-    [] Fazer check list do que está visto e o q não.
+    [X] Fazer check list do que está visto e o q não.
     [] Ler bem o código
     [] Tentar simplificar o código
     [] Passar para os módulos o mais que conseguir para simplificar o main.

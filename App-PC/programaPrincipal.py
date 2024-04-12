@@ -144,7 +144,7 @@ if conSuc:  # Se a conexão for bem sucedida
         if stop:
             # Input com respetiva segurança
             while True:
-                continua = input("Para continuar insira 's' caso contrário o programa para - ")
+                continua = input("Pretende continuar (s/n)? - ")
                 if continua == "s" or continua == "n":
                     break
                 else:
@@ -162,12 +162,34 @@ if conSuc:  # Se a conexão for bem sucedida
                 else:
                     print("Insira s ou n, idiota!")
 
+        # Move robot to initialpos if requested
+        if inicialpos == "s":
+            suc, result, id = ether.sendCMD(sock, "moveByJoint", debug, {"targetPos": initialpoint,
+                                                                         "speed": speed, "acc": 10, "dec": 10})
+            # Try again after cleaning alarm
+            if not suc:
+                suc, result, id = ether.sendCMD(sock, "moveByJoint", debug, {"targetPos": initialpoint,
+                                                                             "speed": speed, "acc": 10,
+                                                                             "dec": 10})
+            while True:
+                suc, result, id = ether.sendCMD(sock, "getRobotState")
+                # Try again after cleaning alarm
+                if not suc:
+                    suc, result, id = ether.sendCMD(sock, "getRobotState")
+                if result == 0:
+                    break
+            inicialpos = "n"
+
         # Sets the coordinate system
         suc, result, id = ether.sendCMD(sock, "setCurrentCoord", debug, {"coord_mode": 2})
+        if not suc:
+            suc, result, id = ether.sendCMD(sock, "setCurrentCoord", debug, {"coord_mode": 2})
 
         # Obtain robot's original position and joint angle
         suc, v_origin, id = ether.sendCMD(sock, "get_tcp_pose", debug, {"unit_type": 0})  # Get robot's
         # current pose (!!!tool!!!). Rotations in degrees.
+        if not suc:
+            suc, v_origin, id = ether.sendCMD(sock, "get_tcp_pose", debug, {"unit_type": 0})
         x_now = v_origin[0]
         y_now = v_origin[1]
         z_now = v_origin[2]
@@ -175,7 +197,6 @@ if conSuc:  # Se a conexão for bem sucedida
         ry_now = v_origin[4]
         rz_now = v_origin[5]
         pose_now = []
-
         # Debug
         if debug == "s":
             print("Principal - v_origin:", v_origin)
@@ -197,22 +218,6 @@ if conSuc:  # Se a conexão for bem sucedida
         # Try again after cleaning alarm
         if not suc:
             suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})
-
-        # Move robot to initialpos if requested
-        if inicialpos == "s":
-            suc, result, id = ether.sendCMD(sock, "moveByJoint", debug, {"targetPos": initialpoint,
-                                                                         "speed": speed, "acc": 10, "dec": 10})
-            # Try again after cleaning alarm
-            if not suc:
-                suc, result, id = ether.sendCMD(sock, "moveByJoint", debug, {"targetPos": initialpoint,
-                                                                             "speed": speed, "acc": 10, "dec": 10})
-            while True:
-                suc, result, id = ether.sendCMD(sock, "getRobotState")
-                # Try again after cleaning alarm
-                if not suc:
-                    suc, result, id = ether.sendCMD(sock, "getRobotState")
-                if result == 0:
-                    break
 
         while True:
             # Print instructions if it is the first run

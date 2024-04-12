@@ -63,7 +63,12 @@ def sendCMD(sock, cmd, debug="n", params=None, id=1) -> object:
         elif "error" in jdata.keys():  # Se houver erro, retorna o erro
             if debug == "s":
                 print("Ethernet - jdata:", jdata['error']['message'])  # Imprime a mensagem de erro
-            continuar = input("Ocorreu um erro. Pretende limpar o erro e continuar o programa? (s/n) -")
+            while True:
+                continuar = input("Ocorreu um erro. Pretende limpar o erro e continuar o programa? (s/n) -")
+                if continuar == "s" or continuar == "n":
+                    break
+                else:
+                    print("Insira s ou n, idiota!")
             if continuar != "s":
                 sys.exit()
             cmd = "clearAlarm"
