@@ -24,9 +24,6 @@ Modulo Ethernet:
 
 To-do:
 
-[X] Outros
-    [X] Colocar no git app testes atualizada.
-
 [] Implementar
     [] - Ifs
         [] - para escolher programa gravado (se escolhermos fazer mais do que 1)
@@ -34,8 +31,6 @@ To-do:
     [] - Modulo Gravação
         [] - Implementar vários ficheiros se quisermos (input nome ou caminho que vai entrar na função)
     [] - Redifinir seguranças?
-    [X] - Colocar todos os possíveis erros no clean error
-    [X] - Seguranças para os inputs
 
 [] Testar
     [] - modulo Wifi
@@ -55,7 +50,6 @@ To-do:
     [X] - Testar seguranças inputs
 
 [] Verificar e Melhorar
-    [X] Fazer check list do que está visto e o q não.
     [] Ler bem o código
     [] Tentar simplificar o código
     [] Passar para os módulos o mais que conseguir para simplificar o main.
