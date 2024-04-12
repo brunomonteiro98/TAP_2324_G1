@@ -9,7 +9,13 @@ from moduloWifi import WiFiCommunicator  # Biblioteca para comunicação wifi
 
 # Conexões
 # Conectar ao ESP32 por porta serial ou wifi
-sow = input("Conectar ao ESP32 por porta serial ou por wifi? (s/w) - ")
+# Input com respetiva segurança
+while True:
+    sow = input("Conectar ao ESP32 por porta serial ou por wifi? (s/w) - ")
+    if sow == "s" or sow == "w":
+        break
+    else:
+        print("Insira s ou w, idiota!")
 match sow:
     case "s":
         portName = input("Porta COM (Ex:COM2) - ")  # Porta COM do ESP32 (colocar COM2)
@@ -17,8 +23,8 @@ match sow:
     case "w":
         communicator = WiFiCommunicator(max_buffer_sz=128)  # Criar o comunicador WiFi (máximo de 128 bytes)
 # Conectar ao controlador por Ethernet
-ip = input("Endereço IP do controlador (mudar para o IP do controlador) - ")  # IP do controlador (colocar 192.168.2.66)
-# ip = "192.168.2.66"
+#ip = input("Endereço IP do controlador (mudar para o IP do controlador) - ")  # IP do controlador (colocar 192.168.2.66)
+ip = "192.168.2.66"
 conSuc, sock = ether.connectETController(ip)  # Conectar ao controlador
 
 # ==================================================================================================================== #
@@ -33,8 +39,13 @@ elif speed < 0.05:  # Se a velocidade for menor que 0%, define a velocidade como
 # ==================================================================================================================== #
 
 # Debug
-debug = input("Debug? (s/n) - ")
-
+# Input com respetiva segurança
+while True:
+    debug = input("Debug? (s/n) - ")
+    if debug == "s" or debug == "n":
+        break
+    else:
+        print("Insira s ou n, idiota!")
 
 # ==================================================================================================================== #
 
@@ -118,20 +129,38 @@ if conSuc:  # Se a conexão for bem sucedida
     firstrun = True  # Variável para identificar se é a primeira vez que o programa corre
     firstrung = True  # Variável para identificar se é a primeira vez que o modulo gravação corre
     initialpoint = ([90, -100, 110, -190, 85, 0])  # posição inicial do robô (em joint angles)
-    inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
+    # Input com respetiva segurança
+    while True:
+        inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
+        if inicialpos == "s" or inicialpos == "n":
+            break
+        else:
+            print("Insira s ou n, idiota!")
 
     # Começa o main "loop"
     while True:
 
         # Pergunta se o utilizador quer continuar após parar (não é necessário na primeira vez)
         if stop:
-            continua = input("Para continuar insira 's' caso contrário o programa para - ")
+            # Input com respetiva segurança
+            while True:
+                continua = input("Para continuar insira 's' caso contrário o programa para - ")
+                if continua == "s" or continua == "n":
+                    break
+                else:
+                    print("Insira s ou n, idiota!")
             if continua == "s":
                 firstrun = True
                 stop = False
             else:
                 break
-            inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
+            # Input com respetiva segurança
+            while True:
+                inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
+                if inicialpos == "s" or inicialpos == "n":
+                    break
+                else:
+                    print("Insira s ou n, idiota!")
 
         # Sets the coordinate system
         suc, result, id = ether.sendCMD(sock, "setCurrentCoord", debug, {"coord_mode": 2})

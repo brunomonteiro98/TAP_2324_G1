@@ -34,16 +34,25 @@ To-do:
     [] - Modulo Gravação
         [] - Implementar vários ficheiros se quisermos (input nome ou caminho que vai entrar na função)
     [] - Redifinir seguranças?
-    [] Colocar todos os possíveis erros no clean error
+    [] - Colocar todos os possíveis erros no clean error
+    [] - Seguranças para os inputs
 
 [] Testar
     [] - modulo Wifi
     [] - modulo Gravação
+        [] - Verificar ficheiro
     [] - modulo Play
+        [] - Verificar tempos
+        [] - Verificar play pause
     [] - Ifs
         [] - para ir para posição inicial
         [] - para para e iniciar play
         [] - para parar o programa
+        [] - limpar erro
+    [] - Se velocidade do robot influencia delay
+    [] - Verificar o shutdown
+    [] - Incrementos de rotação
+    [] - Testar seguranças inputs
 
 [] Verificar e Melhorar
     [] Fazer check list do que está visto e o q não.
