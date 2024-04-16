@@ -17,7 +17,7 @@ rdata = ficheiro.readline()  # Ler a primeira linha
 jdata = json.loads(rdata)  # Converter a ‘string’ para uma lista
 ficheiro.close()  # Fechar o ficheiro
 ficheiro = open("teste.txt", "w")  # Abrir o ficheiro
-jdata = jdata + [teste2]  # Adicionar a nova pose
+jdata = [jdata] + [teste2]  # Adicionar a nova pose
 jdata = json.dumps(jdata)  # Converter a lista para uma ‘string’
 ficheiro.write(jdata)  # Escrever a nova pose
 ficheiro.close()  # Fechar o ficheiro

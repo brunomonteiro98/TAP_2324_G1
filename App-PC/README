@@ -73,11 +73,9 @@ Comentários
 - Delay não depende da velocidade do robô!
 
 Notas telemóvel
-[] No play time.wait() não deve ser necessário pq só corre uma vez a cada while. Supostamente o read tbm e tem influência. Vamos ver.
-- Será que tem de começar no 7?
-[] Ver pq o i=0 e jdata[i+6] dá d pq agora não.
-- Fichlen não devia funcionar
-[] Corrigir o fichlen
-[] Meter o rest de posição quando voltar ao ínicio. Reset ou a inicial no momento da gravação e mandar para ĺa.
+[] Corrigir o fichlen se não funcionar
 [] Corrigir o reset dar erro.
-[] Ou corrigir o ficheiro gravação para ficar como deve ser e cagar no +6
+
+[] Testar o play
+[] Verificar a influencia do time.sleep
+[] Verificar a necessidade do reset (move by joint qd i=0 (no inicio))

@@ -124,7 +124,7 @@ if conSuc:  # Se a conexão for bem sucedida
     # Definição de variáveis
     g = 0  # Variável para identificar se a gravação corre
     p = 0  # Variável para identificar se o play corre
-    i = 6  # Variável para identificar a linha do ficheiro
+    i = 0  # Variável para identificar a linha do ficheiro
     fichlen = 0  # Variável para identificar o número de linhas do ficheiro
     stop = False  # Variável para identificar se o programa deve parar
     continua = True  # Variável para identificar se o programa deve continuar
@@ -282,10 +282,10 @@ if conSuc:  # Se a conexão for bem sucedida
                 fichlen = play.play(i, debug)
                 if i < fichlen:
                     pose_now, fichlen = play.play(i, debug)
-                    i = i + 1
+                    i += 1
                 if i == fichlen:
                     pose_now, fichlen = play.play(i, debug)
-                    i = 6
+                    i = 0
                 # Pause the play if 'space' is pressed
                 if keyboard.is_pressed("space"):
                     pause = True
