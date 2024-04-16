@@ -14,10 +14,10 @@ def play(i, debug):
     # Debug (se ativado)
     if debug == "s":
         print("Play - i:", i)
-        print("Play - rdata:", rdata)
-        print("Play - jdata:", jdata)
+        #print("Play - rdata:", rdata)
+        #print("Play - jdata:", jdata)
         print("Play - data:", data)
-    time.sleep(0.02)  # Esperar 20ms
+    #time.sleep(0.02)  # Esperar 20ms ???
     # Output
     return data, fichlen
 
