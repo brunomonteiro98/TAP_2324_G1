@@ -8,9 +8,9 @@ def play(i, debug):
     ficheiro = open("gravacao.txt", "r")  # Abrir o ficheiro
     rdata = ficheiro.readline()  # Ler a primeira linha
     jdata = json.loads(rdata)  # Converter a ‘string’ para uma lista
-    fichlen = len(jdata)  # Guardar o número de linhas do ficheiro
-    data = jdata[i]  # Ler a linha i
     ficheiro.close()  # Fechar o ficheiro
+    data = jdata[i]  # Ler a linha i
+    fichlen = len(jdata)  # Guardar o número de linhas do ficheiro
     # Debug (se ativado)
     if debug == "s":
         print("Play - i:", i)

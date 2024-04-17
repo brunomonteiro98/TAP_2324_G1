@@ -119,18 +119,23 @@ class WiFiCommunicator:  # WiFi Communicator class
     # Função para ler os dados disponíveis na porta serial
     def read_wifi_data(self, debug="n"):  # Função para ler os dados disponíveis na porta serial
         while not self._rip:
-            datain = self.get_message()  # Lê a linha disponível
-            if datain.require_acknowledgment:
-                msg = OutMessage(data='A')
-                self.send_message(msg)
-            if debug == "s":
-                print("Wifi - data:", datain)  # Imprime a mensagem recebida no terminal para debug
-            jdata = json.loads(str(datain.data, 'utf-8'))  # Converte a resposta para json
-            dataout = [(jdata["Item1"]), (jdata["Item2"]), (jdata["Item3"]), (jdata["Item4"]),
-                       (jdata["Item5"]), (jdata["Item6"])]
-            if debug == "s":
-                print("Wifi - data:", dataout)  # Imprime a mensagem recebida no terminal para debug
-            return dataout
+            if self._incoming_messages_queue.empty():
+                time.sleep(self.CPU_RELEASE_SLEEP)
+                dataout = None
+                return dataout
+            else:
+                datain = self.get_message()  # Lê a linha disponível
+                if datain.require_acknowledgment:
+                    msg = OutMessage(data='A')
+                    self.send_message(msg)
+                if debug == "s":
+                    print("Wifi - data:", datain)  # Imprime a mensagem recebida no terminal para debug
+                jdata = json.loads(str(datain.data, 'utf-8'))  # Converte a resposta para json
+                dataout = [(jdata["Item1"]), (jdata["Item2"]), (jdata["Item3"]), (jdata["Item4"]),
+                           (jdata["Item5"]), (jdata["Item6"])]
+                if debug == "s":
+                    print("Wifi - data:", dataout)  # Imprime a mensagem recebida no terminal para debug
+                return dataout
 
 
 if __name__ == "__main__":  # O código abaixo será executado apenas quando este arquivo for executado diretamente

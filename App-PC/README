@@ -54,28 +54,22 @@ To-do:
     [X] - Testar seguranças inputs
 
 [] Verificar e Melhorar
-    [] Ler bem o código
-    [] Tentar simplificar o código
-    [] Passar para os módulos o mais que conseguir para simplificar o main.
+    [] Passar para os módulos o mais que conseguir para simplificar o main. (Talvez o calculate position)
     [] - Comentar, "limpar" e documentar (este doc) código
     [] - Calibrar aceleração e desaceleração no programaPrincipal mover para posição inicial
+
+Comentários
+- Para não haver delay: Tim send = 20x t sampling do robot 40 para 2 (Teoria: tempo de execução do programa)
+- Delay não depende da velocidade do robô!
+
+Notas telemóvel
+[] Corrigir o reset dar erro.
+[] Testar o play
+[] Verificar a influencia do time.sleep no play
+[] Verificar a necessidade do reset (move by joint qd i=0 (no inicio)) (Vai ser precisa de certeza)
     [] Verificar módulo gravação e play o que gravam e leem. Como voltar à posição inicial? Tirar a posição do ficheirp
     gravação no inicio. Criar outro ficheiro com essa posição e mandar para lá no inicio do ciclo (no fim tbm dá e é mais
     fácil de implementar mas não é tão bom pq pode não estar na posição inicial pretendida. A não ser que no inicio da
     gravação seja sempre a posição de reset e depois é só mandar para lá)? Supostamente já tinhamos verificado q não era
     preciso. Os incrementos bastavam. Isto será pq o que gravamos ser depois do inverse kinematics ou assim? Verificar.
     Se for assim é mt inteligente e isto é desnecessário pq já são posições de juntas.
-    [] - Modulo Play
-        [] - verificar o time.sleep() / time.wait() e ver se é necessário
-
-Comentários
-- Para não haver delay: Tim send = 50x t sampling do robot
-- Delay não depende da velocidade do robô!
-
-Notas telemóvel
-[] Corrigir o fichlen se não funcionar
-[] Corrigir o reset dar erro.
-
-[] Testar o play
-[] Verificar a influencia do time.sleep
-[] Verificar a necessidade do reset (move by joint qd i=0 (no inicio))

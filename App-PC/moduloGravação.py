@@ -8,6 +8,7 @@ def record(pose_now, firstrung, debug):
     if firstrung:
         print("Para parar insira 'h'")
         ficheiro = open("gravacao.txt", "w")
+        pose_now = [pose_now] # Adicionar a nova pose !!!linha super importante!!!
         jdata = json.dumps(pose_now)
         ficheiro.write(jdata)
         ficheiro.close()
@@ -24,7 +25,7 @@ def record(pose_now, firstrung, debug):
             print("Gravação - jdata:", jdata)
         ficheiro.close()  # Fechar o ficheiro
         ficheiro = open("gravacao.txt", "w")  # Abrir o ficheiro
-        jdata = [jdata] + [pose_now]  # Adicionar a nova pose !!!linha super importante!!!
+        jdata = jdata + [pose_now]  # Adicionar a nova pose !!!linha super importante!!!
         # Debug (se ativado)
         if debug == "s":
             print("Gravação - jdata:", jdata)

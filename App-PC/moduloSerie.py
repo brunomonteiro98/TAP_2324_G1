@@ -25,14 +25,17 @@ def close_serial_port():
 
 # Função para ler os dados disponíveis na porta serial
 def read_serial_data(debug="n"):  # Função para ler os dados disponíveis na porta serial
-    data = portaSerie.readline()  # Lê a linha disponível
-    jdata = json.loads(str(data, 'utf-8'))  # Converte a resposta para json
-    data = [(jdata["Item1"]), (jdata["Item2"]), (jdata["Item3"]), (jdata["Item4"]),
-            (jdata["Item5"]), (jdata["Item6"])]
-    if debug == "s":
-        print("Serie - data:", data)  # Imprime a mensagem recebida no terminal para debug
-    return data
-
+    if portaSerie.in_waiting == 0:
+        data = None
+        return data
+    else:
+        data = portaSerie.readline()  # Lê a linha disponível
+        jdata = json.loads(str(data, 'utf-8'))  # Converte a resposta para json
+        data = [(jdata["Item1"]), (jdata["Item2"]), (jdata["Item3"]), (jdata["Item4"]),
+                (jdata["Item5"]), (jdata["Item6"])]
+        if debug == "s":
+            print("Serie - data:", data)  # Imprime a mensagem recebida no terminal para debug
+        return data
 
 if __name__ == "__main__":  # O código abaixo será executado apenas quando este arquivo for executado diretamente
     pass  # Nada acontece

@@ -1,5 +1,6 @@
 # Importação das bibliotecas necessárias
 import keyboard  # Biblioteca para manipulação de teclado
+import threading  # Biblioteca para manipulação de threads
 import moduloEthernet as ether  # Biblioteca para comunicação Ethernet
 import moduloSerie as serie  # Biblioteca para comunicação serial
 import moduloGravação as gravacao  # Biblioteca para gravação de dados
@@ -41,12 +42,35 @@ elif speed < 0.05:  # Se a velocidade for menor que 0%, define a velocidade como
 
 # Debug
 # ‘Input’ com respetiva segurança
+global debug
 while True:
     debug = input("Debug? (s/n) - ")
     if debug == "s" or debug == "n":
         break
     else:
         print("Insira s ou n, idiota!")
+
+# ==================================================================================================================== #
+
+# Criar a thread para ler os dados do sensor
+global data
+data = [0, 0, 0, 0, 0, 0]  # Inicializar a lista de dados
+
+
+# Define a função da thread
+def task(debug):
+    global data
+    print("Thread iniciada")
+    while True:
+        if sow == "s":  # Se a conexão for por porta serial
+            data = serie.read_serial_data(debug)  # Ler os dados do sensor
+        elif sow == "w":  # Se a conexão for por wifi
+            data = communicator.read_wifi_data(debug)  # Ler os dados do sensor
+
+
+# Criar a thread e iniciar
+t = threading.Thread(target=task, args=debug)  # Criar a thread para ler os dados do sensor
+t.start()  # Iniciar a thread
 
 
 # ==================================================================================================================== #
@@ -57,17 +81,21 @@ while True:
 # angle: lista com os ângulos atuais
 def calculate_position(position: list, angle: list):
     # Ler os dados do sensor
-    data = []  # Inicializar a lista de dados
-    if sow == "s":  # Se a conexão for por porta serial
-        data = serie.read_serial_data(debug)  # Ler os dados do sensor
-    elif sow == "w":  # Se a conexão for por wifi
-        data = communicator.read_wifi_data(debug)  # Ler os dados do sensor
-    ax = data[0]
-    ay = data[1]
-    az = data[2]
-    gx = data[3]
-    gy = data[4]
-    gz = data[5]
+    global data
+    if data is None:  # Se não houver dados, retorna 0's
+        ax = 0
+        ay = 0
+        az = 0
+        gx = 0
+        gy = 0
+        gz = 0
+    else:  # Se houver dados
+        ax = data[0]
+        ay = data[1]
+        az = data[2]
+        gx = data[3]
+        gy = data[4]
+        gz = data[5]
 
     # Calcular a nova posição (verificar + ou - conforme o sensor)
     new_position_x = position[0] + ax
@@ -279,11 +307,11 @@ if conSuc:  # Se a conexão for bem sucedida
 
             # Play the recorded data
             if p == 1:
-                fichlen = play.play(i, debug)
-                if i < fichlen:
+                pose_now, fichlen = play.play(i, debug)
+                if i < fichlen - 1:  # fichlen-1 because it starts at 0 so the last one is fichlen-1
                     pose_now, fichlen = play.play(i, debug)
                     i += 1
-                if i == fichlen:
+                if i == fichlen - 1:  # fichlen-1 because it starts at 0 so the last one is fichlen-1
                     pose_now, fichlen = play.play(i, debug)
                     i = 0
                 # Pause the play if 'space' is pressed
