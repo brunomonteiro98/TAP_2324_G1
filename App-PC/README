@@ -77,6 +77,7 @@ Notas telemóvel
 
 Events em threds que atualizam g, h, q, p, ...
 Opções:
-    investigar usos exemplo já feitos
+    investigar usos exemplo já feitos (!!!tirar ideia do listener e aplicar com variáveis já usadas!!! acho que á a mais fácil de implementar)
+        (só não é a mais rápida mas não por muito. Caso seja preciso mais rápido, meter cada parte a correr em outro thread (ver exemplo))
     meter os keyboars press todos numa função em outro thread e execuatva tudo. Esse thread era chamado no while principal
     meter os keyboars press todos numa função em outro thread e atualizava por ex: if q -> q=1 e no while principal if q ==1 ->... Esse thread era chamado no while principal
