@@ -63,6 +63,7 @@ Comentários
 - Delay não depende da velocidade do robô!
 
 Notas telemóvel
+[] Verificar os events para o inserir teclas que às vezes não funciona
 [] Corrigir o reset dar erro.
 [] Testar o play
 [] Verificar a influencia do time.sleep no play
@@ -73,3 +74,9 @@ Notas telemóvel
     gravação seja sempre a posição de reset e depois é só mandar para lá)? Supostamente já tinhamos verificado q não era
     preciso. Os incrementos bastavam. Isto será pq o que gravamos ser depois do inverse kinematics ou assim? Verificar.
     Se for assim é mt inteligente e isto é desnecessário pq já são posições de juntas.
+
+Events em threds que atualizam g, h, q, p, ...
+Opções:
+    investigar usos exemplo já feitos
+    meter os keyboars press todos numa função em outro thread e execuatva tudo. Esse thread era chamado no while principal
+    meter os keyboars press todos numa função em outro thread e atualizava por ex: if q -> q=1 e no while principal if q ==1 ->... Esse thread era chamado no while principal

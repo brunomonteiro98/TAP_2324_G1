@@ -308,6 +308,25 @@ if conSuc:  # Se a conexão for bem sucedida
             # Play the recorded data
             if p == 1:
                 pose_now, fichlen = play.play(i, debug)
+                '''if i == 0: # Send the robot to the first position
+                    pose_now, fichlen = play.play(i, debug)
+                    suc, result, id = ether.sendCMD(sock, "moveByJoint", debug, {"targetPos": pose_now,
+                                                                                 "speed": speed, "acc": 10,
+                                                                                 "dec": 10})
+                    # Try again after cleaning alarm
+                    if not suc:
+                        suc, result, id = ether.sendCMD(sock, "moveByJoint", debug, {"targetPos": pose_now,
+                                                                                     "speed": speed, "acc": 10,
+                                                                                     "dec": 10})
+                    while True:
+                        suc, result, id = ether.sendCMD(sock, "getRobotState")
+                        # Try again after cleaning alarm
+                        if not suc:
+                            suc, result, id = ether.sendCMD(sock, "getRobotState")
+                        if result == 0:
+                            break
+                    i += 1'''
+                # !!! (colocar 0 < qd descomentar) !!!
                 if i < fichlen - 1:  # fichlen-1 because it starts at 0 so the last one is fichlen-1
                     pose_now, fichlen = play.play(i, debug)
                     i += 1
