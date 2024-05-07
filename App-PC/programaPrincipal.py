@@ -154,7 +154,7 @@ if conSuc:  # Se a conexão for bem sucedida
     g = 0  # Variável para identificar se a gravação corre
     p = 0  # Variável para identificar se o play corre
     i = 0  # Variável para identificar a linha do ficheiro
-    ig = 0  #Variável para identificar o nº da posição
+    ig = 0  # Variável para identificar o número da posição
     fichlen = 0  # Variável para identificar o número de linhas do ficheiro
     stop = False  # Variável para identificar se o programa deve parar
     continua = True  # Variável para identificar se o programa deve continuar
@@ -199,12 +199,11 @@ if conSuc:  # Se a conexão for bem sucedida
         # Move robot to initialpos if requested
         if inicialpos == "s":
             suc, result, id = ether.sendCMD(sock, "moveByJoint", debug, {"targetPos": initialpoint,
-                                                                         "speed": speed, "acc": 10, "dec": 10})
+                                                                         "speed": speed, "acc": 50, "dec": 50})
             # Try again after cleaning alarm
             if not suc:
                 suc, result, id = ether.sendCMD(sock, "moveByJoint", debug, {"targetPos": initialpoint,
-                                                                             "speed": speed, "acc": 10,
-                                                                             "dec": 10})
+                                                                             "speed": speed, "acc": 50, "dec": 50})
             while True:
                 suc, result, id = ether.sendCMD(sock, "getRobotState")
                 # Try again after cleaning alarm
@@ -284,11 +283,15 @@ if conSuc:  # Se a conexão for bem sucedida
             if g == 1:
                 ig += 1
                 firstrungTXT = gravacaoTXT.record(pose_now, firstrungTXT, debug)
-                firstrungJBI, lastrungJBI, ig = gravacaoJBI.record(pose_now, firstrungJBI, lastrungJBI, ig, speed, debug)
+                firstrungJBI, lastrungJBI, ig, g = gravacaoJBI.record(pose_now, firstrungJBI, lastrungJBI,
+                                                                      ig, g, speed, debug)
 
             # Stop recording if 'h' is pressed
             if keyboard.is_pressed("h"):
                 print("Gravação terminada")
+                lastrungJBI = True
+                firstrungJBI, lastrungJBI, ig, g = gravacaoJBI.record(pose_now, firstrungJBI, lastrungJBI,
+                                                                      ig, g, speed, debug)
                 g = 0
 
             # Start playing if 'p' is pressed

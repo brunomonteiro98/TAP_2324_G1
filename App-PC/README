@@ -29,6 +29,9 @@ To-do:
     ![] - Corrigir o reset da posição que corre x=vorigin antes do getTcppose que vem antes
     ![] - Gravar os movimentos num ficheiro do robô (n gravar todas as posições mas gravar de
      5 em 5 para diminuir o tamanho do ficheiro)
+     Verificar o mveml se é tabela de posições e chega
+     A ideia é escolhermos quando gravar todos os pontos !!!!!!!!!!!!!!!!!!!!!!!!!!
+     Ou verificar o tempo de cada iteração e só gravar de x em x tempo de maneira a que a gravação possa ter até 5min por exemplo
     [] - Ifs
         [] - para escolher programa gravado (se escolhermos fazer mais do que 1)
         [] - para parar e iniciar play (se existir ficheiro)
