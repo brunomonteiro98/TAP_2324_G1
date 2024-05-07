@@ -3,7 +3,8 @@ import keyboard  # Biblioteca para manipulação de teclado
 import threading  # Biblioteca para manipulação de threads
 import moduloEthernet as ether  # Biblioteca para comunicação Ethernet
 import moduloSerie as serie  # Biblioteca para comunicação serial
-import moduloGravação as gravacao  # Biblioteca para gravação de dados
+import moduloGravaçãoTXT as gravacaoTXT  # Biblioteca para gravação de dados
+import moduloGravaçãoJBI as gravacaoJBI  # Biblioteca para gravação de dados
 import moduloPlay as play  # Biblioteca para play dos dados
 from moduloWifi import WiFiCommunicator  # Biblioteca para comunicação wifi
 
@@ -157,7 +158,9 @@ if conSuc:  # Se a conexão for bem sucedida
     stop = False  # Variável para identificar se o programa deve parar
     continua = True  # Variável para identificar se o programa deve continuar
     firstrun = True  # Variável para identificar se é a primeira vez que o programa corre
-    firstrung = True  # Variável para identificar se é a primeira vez que o modulo gravação corre
+    firstrungTXT = True  # Variável para identificar se é a primeira vez que o modulo gravação corre
+    firstrungJBI = True  # Variável para identificar se é a primeira vez que o modulo gravação corre
+    lastrungJBI = False  # Variável para identificar se é a última vez que o modulo gravação corre
     initialpoint = ([90, -100, 110, -190, 85, 0])  # posição inicial do robô (em joint angles)
     # ‘Input’ com respetiva segurança
     while True:
@@ -278,7 +281,8 @@ if conSuc:  # Se a conexão for bem sucedida
 
             # Record the sensor data
             if g == 1:
-                firstrung = gravacao.record(pose_now, firstrung, debug)
+                firstrungTXT = gravacaoTXT.record(pose_now, firstrungTXT, debug)
+                firstrungJBI, lastrung = gravacaoJBI.record(pose_now, firstrungJBI, lastrungJBI, debug)
 
             # Stop recording if 'h' is pressed
             if keyboard.is_pressed("h"):

@@ -1,4 +1,4 @@
-# Impotação de bibliotecas
+# Importação de bibliotecas
 import json  # Biblioteca para manipulação de ficheiros JSON
 
 
