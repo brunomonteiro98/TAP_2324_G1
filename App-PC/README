@@ -27,6 +27,8 @@ To-do:
 [] Implementar
     ![] - Corrigir o pretende continuar? depois do "q" que aparece 2 vezes.
     ![] - Corrigir o reset da posição que corre x=vorigin antes do getTcppose que vem antes
+    ![] - Gravar os movimentos num ficheiro do robô (n gravar todas as posições mas gravar de
+     5 em 5 para diminuir o tamanho do ficheiro)
     [] - Ifs
         [] - para escolher programa gravado (se escolhermos fazer mais do que 1)
         [] - para parar e iniciar play (se existir ficheiro)
