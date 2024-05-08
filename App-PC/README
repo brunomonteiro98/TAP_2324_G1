@@ -86,3 +86,18 @@ Opções:
         (só não é a mais rápida mas não por muito. Caso seja preciso mais rápido, meter cada parte a correr em outro thread (ver exemplo))
     meter os keyboars press todos numa função em outro thread e execuatva tudo. Esse thread era chamado no while principal
     meter os keyboars press todos numa função em outro thread e atualizava por ex: if q -> q=1 e no while principal if q ==1 ->... Esse thread era chamado no while principal
+
+Notas telemóvel por limpar:
+[] Fazer gravação do ficheiro para robô offline
+[] Verificar
+    [] Threads events
+    [] Play testes
+    [] Comunicação já com dados do sensor teste robô
+!!!!!!!!!!!!!!!!!!!!!!!
+Escolher que modo gravar
+E de que modo dar play
+Basta comentar penso eu
+Esquece. Play só dá com o txt e podemos gravar os 2 ao msm tempo. Não é preciso sair nada nem eecolher nada.
+No import do json dar imput trocado.
+Realtime clock conta tempo. If tempo < x segumdos pass, else rpda normal e volya a resetar o tempo. Meljor qie nr de iteraçõez
+!!!!!!!!!!!!!!!!!!!!!!!
