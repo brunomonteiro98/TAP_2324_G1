@@ -94,10 +94,6 @@ Notas telemóvel por limpar:
     [] Play testes
     [] Comunicação já com dados do sensor teste robô
 !!!!!!!!!!!!!!!!!!!!!!!
-Escolher que modo gravar
-E de que modo dar play
-Basta comentar penso eu
-Esquece. Play só dá com o txt e podemos gravar os 2 ao msm tempo. Não é preciso sair nada nem eecolher nada.
 No import do json dar imput trocado.
 Realtime clock conta tempo. If tempo < x segumdos pass, else rpda normal e volya a resetar o tempo. Meljor qie nr de iteraçõez
 !!!!!!!!!!!!!!!!!!!!!!!
