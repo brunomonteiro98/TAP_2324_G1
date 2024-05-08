@@ -1,4 +1,5 @@
 # Importação das bibliotecas necessárias
+import time  # Biblioteca para manipulação de tempo
 import keyboard  # Biblioteca para manipulação de teclado
 import threading  # Biblioteca para manipulação de threads
 import moduloEthernet as ether  # Biblioteca para comunicação Ethernet
@@ -163,13 +164,17 @@ if conSuc:  # Se a conexão for bem sucedida
     firstrungJBI = True  # Variável para identificar se é a primeira vez que o modulo gravação corre
     lastrungJBI = False  # Variável para identificar se é a última vez que o modulo gravação corre
     initialpoint = ([90, -100, 110, -190, 85, 0])  # posição inicial do robô (em joint angles)
-    # ‘Input’ com respetiva segurança
-    while True:
-        inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
-        if inicialpos == "s" or inicialpos == "n":
-            break
-        else:
-            print("Insira s ou n, idiota!")
+    # Obter a posição atual do robô
+    suc, v_origin, id = ether.sendCMD(sock, "get_joint_pos", debug, {"unit_type": 0})  # Get robot's
+    # current pos (!!!joint!!!). Rotations in degrees.
+    if initialpoint != v_origin:  # Se a posição inicial for diferente da posição atual
+        # ‘Input’ com respetiva segurança
+        while True:
+            inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
+            if inicialpos == "s" or inicialpos == "n":
+                break
+            else:
+                print("Insira s ou n, idiota!")
 
     # Começa o main "loop"
     while True:
@@ -188,13 +193,18 @@ if conSuc:  # Se a conexão for bem sucedida
                 stop = False
             else:
                 break
-            # ‘Input’ com respetiva segurança
-            while True:
-                inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
-                if inicialpos == "s" or inicialpos == "n":
-                    break
-                else:
-                    print("Insira s ou n, idiota!")
+
+            # Obter a posição atual do robô
+            suc, v_origin, id = ether.sendCMD(sock, "get_joint_pos", debug, {"unit_type": 0})  # Get robot's
+            # current pos (!!!joint!!!). Rotations in degrees.
+            if initialpoint != v_origin:  # Se a posição inicial for diferente da posição atual
+                # ‘Input’ com respetiva segurança
+                while True:
+                    inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
+                    if inicialpos == "s" or inicialpos == "n":
+                        break
+                    else:
+                        print("Insira s ou n, idiota!")
 
         # Move robot to initialpos if requested
         if inicialpos == "s":
@@ -276,15 +286,39 @@ if conSuc:  # Se a conexão for bem sucedida
 
             # Start recording if 'g' is pressed
             if keyboard.is_pressed("g"):
+                while True:
+                    gmode = input("Gravação em modo tempo ou pontos no modo JBI? (t/p) - ")
+                    if continua == "t" or continua == "p":
+                        break
+                    else:
+                        print("Insira t ou p, idiota!")
                 print("Gravação iniciada")
+                if gmode == "t":
+                    print("O programa tirará pontos a cada 2 segundos. Para parar insira 'h'")
+                elif gmode == "p":
+                    print("O programa tirará pontos sempre que 'f' for premido. Para parar insira 'h'")
                 g = 1
+                starttime = time.time()
 
             # Record the sensor data
             if g == 1:
-                ig += 1
-                firstrungTXT = gravacaoTXT.record(pose_now, firstrungTXT, debug)
-                firstrungJBI, lastrungJBI, ig, g = gravacaoJBI.record(pose_now, firstrungJBI, lastrungJBI,
-                                                                      ig, g, speed, debug)
+                if gmode == "t":
+                    now = time.time()
+                    elapsedtime = now - starttime  # Calculate elapsed time
+                    if elapsedtime > 2:  # Record every 2 seconds (capacity is 255 poins, so 8.5 minutes)
+                        ig += 1
+                        firstrungTXT = gravacaoTXT.record(pose_now, firstrungTXT, debug)
+                        firstrungJBI, lastrungJBI, ig, g = gravacaoJBI.record(pose_now, firstrungJBI, lastrungJBI,
+                                                                              ig, g, speed, debug)
+                        starttime = now  # Reset start time
+                        print("Ponto gravado")
+                elif gmode == "p":
+                    if keyboard.is_pressed("f"):
+                        ig += 1
+                        firstrungTXT = gravacaoTXT.record(pose_now, firstrungTXT, debug)
+                        firstrungJBI, lastrungJBI, ig, g = gravacaoJBI.record(pose_now, firstrungJBI, lastrungJBI,
+                                                                              ig, g, speed, debug)
+                        print("Ponto gravado")
 
             # Stop recording if 'h' is pressed
             if keyboard.is_pressed("h"):

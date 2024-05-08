@@ -22,21 +22,20 @@ Modulo Ethernet:
     3- Ir ao Cmd dar ping ao ip do robot (para verificar se conectado)
     4- Inserir ip do robot no programa
 
+Modulo GravaçãoJBI:
+    ... tutorial de como enviar o ficheiro para o robot (notepad++)
+
+Modulo GravaçãoTXT:
+
+Modulo Play:
+
 To-do:
 
 [] Implementar
     ![] - Corrigir o pretende continuar? depois do "q" que aparece 2 vezes.
     ![] - Corrigir o reset da posição que corre x=vorigin antes do getTcppose que vem antes
-    ![] - Gravar os movimentos num ficheiro do robô (n gravar todas as posições mas gravar de
-     5 em 5 para diminuir o tamanho do ficheiro)
-     Verificar o mveml se é tabela de posições e chega
-     A ideia é escolhermos quando gravar todos os pontos !!!!!!!!!!!!!!!!!!!!!!!!!!
-     Ou verificar o tempo de cada iteração e só gravar de x em x tempo de maneira a que a gravação possa ter até 5min por exemplo
     [] - Ifs
-        [] - para escolher programa gravado (se escolhermos fazer mais do que 1)
-        [] - para parar e iniciar play (se existir ficheiro)
-        ![] - Verifica se está na posição de reset e se já estiver não reseta a posição
-        ![] - Verificar os len/fichlen para vir como int e não tuple
+        [] - Para escolher programa gravado (se escolhermos fazer mais do que 1)
     [] - Modulo Gravação
         [] - Implementar vários ficheiros se quisermos (input nome ou caminho que vai entrar na função)
     [] - Redifinir seguranças?
@@ -46,7 +45,7 @@ To-do:
     [] - modulo Gravação
         [] - Verificar ficheiro
     [] - modulo Play
-        [] - Verificar tempos
+        [] - Verificar tempos (time.sleep)
         [] - Verificar play pause
     [] - Ifs
         [X] - para ir para posição inicial
@@ -57,43 +56,24 @@ To-do:
     [X] - Verificar o shutdown
     [] - Incrementos de rotação
     [X] - Testar seguranças inputs
+    [] Comunicação já com dados do sensor teste robô (No import do json dar imput trocado se necessário)
 
 [] Verificar e Melhorar
+    [] Verificar a necessidade do reset no modulo play (move by joint qd i=0 (no inicio)) (Vai ser precisa de certeza)
+        if q ==1 ->... Esse thread era chamado no while principal
+    [] Verificar o mveml se é tabela de posições e chega
     [] Passar para os módulos o mais que conseguir para simplificar o main. (Talvez o calculate position)
     [] - Comentar, "limpar" e documentar (este doc) código
     [] - Calibrar aceleração e desaceleração no programaPrincipal mover para posição inicial
+    [] Verificar os events (threads) para o inserir teclas que às vezes não funciona (Events em threds que atualizam g,
+         h, q, p, ...)
+         Opções:
+        investigar usos exemplo já feitos (!!!tirar ideia do listener e aplicar com variáveis já usadas!!! acho que á a mais
+         fácil de implementar) (só não é a mais rápida mas não por muito. Caso seja preciso mais rápido, meter cada parte a
+         correr em outro thread (ver exemplo))
+        meter os keyboars press todos numa função em outro thread e execuatva tudo. Esse thread era chamado no while principal
+        meter os keyboars press todos numa função em outro thread e atualizava por ex: if q -> q=1 e no while principal
 
 Comentários
 - Para não haver delay: Tim send = 20x t sampling do robot 40 para 2 (Teoria: tempo de execução do programa)
 - Delay não depende da velocidade do robô!
-
-Notas telemóvel
-[] Verificar os events para o inserir teclas que às vezes não funciona
-[] Corrigir o reset dar erro.
-[] Testar o play
-[] Verificar a influencia do time.sleep no play
-[] Verificar a necessidade do reset (move by joint qd i=0 (no inicio)) (Vai ser precisa de certeza)
-    [] Verificar módulo gravação e play o que gravam e leem. Como voltar à posição inicial? Tirar a posição do ficheirp
-    gravação no inicio. Criar outro ficheiro com essa posição e mandar para lá no inicio do ciclo (no fim tbm dá e é mais
-    fácil de implementar mas não é tão bom pq pode não estar na posição inicial pretendida. A não ser que no inicio da
-    gravação seja sempre a posição de reset e depois é só mandar para lá)? Supostamente já tinhamos verificado q não era
-    preciso. Os incrementos bastavam. Isto será pq o que gravamos ser depois do inverse kinematics ou assim? Verificar.
-    Se for assim é mt inteligente e isto é desnecessário pq já são posições de juntas.
-
-Events em threds que atualizam g, h, q, p, ...
-Opções:
-    investigar usos exemplo já feitos (!!!tirar ideia do listener e aplicar com variáveis já usadas!!! acho que á a mais fácil de implementar)
-        (só não é a mais rápida mas não por muito. Caso seja preciso mais rápido, meter cada parte a correr em outro thread (ver exemplo))
-    meter os keyboars press todos numa função em outro thread e execuatva tudo. Esse thread era chamado no while principal
-    meter os keyboars press todos numa função em outro thread e atualizava por ex: if q -> q=1 e no while principal if q ==1 ->... Esse thread era chamado no while principal
-
-Notas telemóvel por limpar:
-[] Fazer gravação do ficheiro para robô offline
-[] Verificar
-    [] Threads events
-    [] Play testes
-    [] Comunicação já com dados do sensor teste robô
-!!!!!!!!!!!!!!!!!!!!!!!
-No import do json dar imput trocado.
-Realtime clock conta tempo. If tempo < x segumdos pass, else rpda normal e volya a resetar o tempo. Meljor qie nr de iteraçõez
-!!!!!!!!!!!!!!!!!!!!!!!
