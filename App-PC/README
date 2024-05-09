@@ -52,6 +52,9 @@ To-do:
         [] - para para e iniciar play
         [X] - para parar o programa
         [X] - limpar erro
+    [X] - Input initialpos não aparece quando já na initialpos
+    [] - Threads start and stop
+    [X] - Termino e reset das threads e do programa
     [] - Se velocidade do robot influencia delay
     [X] - Verificar o shutdown
     [] - Incrementos de rotação
