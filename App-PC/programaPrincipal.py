@@ -2,6 +2,7 @@
 import time  # Biblioteca para manipulação de tempo
 import keyboard  # Biblioteca para manipulação de teclado
 import threading  # Biblioteca para manipulação de threads
+import numpy as np  # Biblioteca para manipulação de arrays
 import moduloEthernet as ether  # Biblioteca para comunicação Ethernet
 import moduloSerie as serie  # Biblioteca para comunicação serial
 import moduloGravaçãoTXT as gravacaoTXT  # Biblioteca para gravação de dados
@@ -57,17 +58,20 @@ while True:
 # Criar a thread para ler os dados do sensor
 global data
 data = [0, 0, 0, 0, 0, 0]  # Inicializar a lista de dados
+global stop
+stop = False  # Variável para identificar se o programa deve parar
 
 
 # Define a função da thread
 def task(debug):
     global data
     print("Thread iniciada")
-    while True:
+    while not stop:
         if sow == "s":  # Se a conexão for por porta serial
             data = serie.read_serial_data(debug)  # Ler os dados do sensor
         elif sow == "w":  # Se a conexão for por wifi
             data = communicator.read_wifi_data(debug)  # Ler os dados do sensor
+    print("Thread terminada")
 
 
 # Criar a thread e iniciar
@@ -157,9 +161,9 @@ if conSuc:  # Se a conexão for bem sucedida
     i = 0  # Variável para identificar a linha do ficheiro
     ig = 0  # Variável para identificar o número da posição
     fichlen = 0  # Variável para identificar o número de linhas do ficheiro
-    stop = False  # Variável para identificar se o programa deve parar
     continua = True  # Variável para identificar se o programa deve continuar
     firstrun = True  # Variável para identificar se é a primeira vez que o programa corre
+    initialpos = "n"  # Variável para identificar se o robô deve ir para a posição inicial
     firstrungTXT = True  # Variável para identificar se é a primeira vez que o modulo gravação corre
     firstrungJBI = True  # Variável para identificar se é a primeira vez que o modulo gravação corre
     lastrungJBI = False  # Variável para identificar se é a última vez que o modulo gravação corre
@@ -167,11 +171,12 @@ if conSuc:  # Se a conexão for bem sucedida
     # Obter a posição atual do robô
     suc, v_origin, id = ether.sendCMD(sock, "get_joint_pos", debug, {"unit_type": 0})  # Get robot's
     # current pos (!!!joint!!!). Rotations in degrees.
-    if initialpoint != v_origin:  # Se a posição inicial for diferente da posição atual
+    v_origin = list(np.round(v_origin))
+    if v_origin != initialpoint:  # Se a posição inicial for diferente da posição atual
         # ‘Input’ com respetiva segurança
         while True:
-            inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
-            if inicialpos == "s" or inicialpos == "n":
+            initialpos = input("Prentende resetar a posição do robot? (s/n) - ")
+            if initialpos == "s" or initialpos == "n":
                 break
             else:
                 print("Insira s ou n, idiota!")
@@ -191,23 +196,26 @@ if conSuc:  # Se a conexão for bem sucedida
             if continua == "s":
                 firstrun = True
                 stop = False
+                t = threading.Thread(target=task, args=debug)  # Criar a thread para ler os dados do sensor
+                t.start()  # Iniciar a thread
             else:
                 break
 
             # Obter a posição atual do robô
             suc, v_origin, id = ether.sendCMD(sock, "get_joint_pos", debug, {"unit_type": 0})  # Get robot's
             # current pos (!!!joint!!!). Rotations in degrees.
-            if initialpoint != v_origin:  # Se a posição inicial for diferente da posição atual
+            v_origin = list(np.round(v_origin))
+            if v_origin != initialpoint:  # Se a posição inicial for diferente da posição atual
                 # ‘Input’ com respetiva segurança
                 while True:
-                    inicialpos = input("Prentende resetar a posição do robot? (s/n) - ")
-                    if inicialpos == "s" or inicialpos == "n":
+                    initialpos = input("Prentende resetar a posição do robot? (s/n) - ")
+                    if initialpos == "s" or initialpos == "n":
                         break
                     else:
                         print("Insira s ou n, idiota!")
 
         # Move robot to initialpos if requested
-        if inicialpos == "s":
+        if initialpos == "s":
             suc, result, id = ether.sendCMD(sock, "moveByJoint", debug, {"targetPos": initialpoint,
                                                                          "speed": speed, "acc": 50, "dec": 50})
             # Try again after cleaning alarm
@@ -221,7 +229,7 @@ if conSuc:  # Se a conexão for bem sucedida
                     suc, result, id = ether.sendCMD(sock, "getRobotState")
                 if result == 0:
                     break
-            inicialpos = "n"
+            initialpos = "n"
 
         # Sets the coordinate system
         suc, result, id = ether.sendCMD(sock, "setCurrentCoord", debug, {"coord_mode": 2})
