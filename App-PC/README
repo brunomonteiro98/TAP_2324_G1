@@ -80,3 +80,5 @@ To-do:
 Comentários
 - Para não haver delay: Tim send = 20x t sampling do robot 40 para 2 (Teoria: tempo de execução do programa)
 - Delay não depende da velocidade do robô!
+
+"Best way to input keyboard values during a python execution without stopping execution"

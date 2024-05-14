@@ -17,6 +17,7 @@ from moduloWifi import WiFiCommunicator  # Biblioteca para comunicação wifi
 # ‘Input’ com respetiva segurança
 while True:
     sow = input("Conectar ao ESP32 por porta serial ou por wifi? (s/w) - ")
+    time.sleep(0.1)
     if sow == "s" or sow == "w":
         break
     else:
@@ -24,6 +25,7 @@ while True:
 match sow:
     case "s":
         portName = input("Porta COM (Ex:COM2) - ")  # Porta COM do ESP32 (colocar COM2)
+        time.sleep(0.1)
         serie.connect_serial_port(portName)  # Conectar à porta serial
     case "w":
         communicator = WiFiCommunicator(max_buffer_sz=128)  # Criar o comunicador WiFi (máximo de 128 bytes)
@@ -36,6 +38,7 @@ conSuc, sock = ether.connectETController(ip)  # Conectar ao controlador
 
 # Velocidade do robô (0-100%)
 speed = int(input("Velocidade do robô (0.05-100%) - "))  # Velocidade do robô
+time.sleep(0.1)
 if speed > 100:  # Se a velocidade for maior que 100%, define a velocidade como 100%
     speed = 100  # Velocidade do robô
 elif speed < 0.05:  # Se a velocidade for menor que 0%, define a velocidade como 0%
@@ -48,6 +51,7 @@ elif speed < 0.05:  # Se a velocidade for menor que 0%, define a velocidade como
 global debug
 while True:
     debug = input("Debug? (s/n) - ")
+    time.sleep(0.1)
     if debug == "s" or debug == "n":
         break
     else:
@@ -60,23 +64,58 @@ global data
 data = [0, 0, 0, 0, 0, 0]  # Inicializar a lista de dados
 global stop
 stop = False  # Variável para identificar se o programa deve parar
+global stopt2
+stopt2 = False  # Variável para identificar se a thread 2 deve parar
+global key
+key = "None"  # Variável para identificar a tecla premida
 
 
 # Define a função da thread
 def task(debug):
     global data
-    print("Thread iniciada")
+    if debug == "s":
+        print("Thread iniciada")
     while not stop:
         if sow == "s":  # Se a conexão for por porta serial
             data = serie.read_serial_data(debug)  # Ler os dados do sensor
         elif sow == "w":  # Se a conexão for por wifi
             data = communicator.read_wifi_data(debug)  # Ler os dados do sensor
-    print("Thread terminada")
+        time.sleep(0.01)
+    if debug == "s":
+        print("Thread terminada")
+
+
+
+def task2(debug):
+    global key
+    if debug == "s":
+        print("Thread 2 iniciada")
+    while not stop:
+        while not stopt2:
+            if keyboard.is_pressed("q"):  # Press 'q' to stop the program
+                key = "q"
+            elif keyboard.is_pressed("p"):  # Press 'p' to play
+                key = "p"
+            elif keyboard.is_pressed("g"):  # Press 'g' to start recording
+                key = "g"
+            elif keyboard.is_pressed("h"):  # Press 'h' to stop recording
+                key = "h"
+            elif keyboard.is_pressed("f"):  # Press 'f' to record a point
+                key = "f"
+            elif keyboard.is_pressed("space"):  # Press 'space' to pause the play
+                key = "space"
+            elif keyboard.is_pressed("+"):  # Press '+' to stop the play
+                key = "+"
+        time.sleep(0.1)
+    if debug == "s":
+        print("Thread terminada")
 
 
 # Criar a thread e iniciar
 t = threading.Thread(target=task, args=debug)  # Criar a thread para ler os dados do sensor
 t.start()  # Iniciar a thread
+t2 = threading.Thread(target=task2, args=debug)  # Criar a thread para ler o teclado
+t2.start()  # Iniciar a thread
 
 
 # ==================================================================================================================== #
@@ -175,11 +214,14 @@ if conSuc:  # Se a conexão for bem sucedida
     if v_origin != initialpoint:  # Se a posição inicial for diferente da posição atual
         # ‘Input’ com respetiva segurança
         while True:
-            initialpos = input("Prentende resetar a posição do robot? (s/n) - ")
+            stopt2 = True
+            initialpos = input("Pretende resetar a posição do robot? (s/n) - ")
+            time.sleep(0.1)
             if initialpos == "s" or initialpos == "n":
                 break
             else:
                 print("Insira s ou n, idiota!")
+        stopt2 = False
 
     # Começa o main "loop"
     while True:
@@ -188,16 +230,20 @@ if conSuc:  # Se a conexão for bem sucedida
         if stop:
             # ‘Input’ com respetiva segurança
             while True:
+                stopt2 = True
                 continua = input("Pretende continuar (s/n)? - ")
+                time.sleep(0.1)
                 if continua == "s" or continua == "n":
                     break
-                else:
-                    print("Insira s ou n, idiota!")
+                print("Insira s ou n, idiota!")
+            stopt2 = False
             if continua == "s":
                 firstrun = True
                 stop = False
                 t = threading.Thread(target=task, args=debug)  # Criar a thread para ler os dados do sensor
                 t.start()  # Iniciar a thread
+                t2 = threading.Thread(target=task2, args=debug)  # Criar a thread para ler o teclado
+                t2.start()  # Iniciar a thread
             else:
                 break
 
@@ -208,11 +254,14 @@ if conSuc:  # Se a conexão for bem sucedida
             if v_origin != initialpoint:  # Se a posição inicial for diferente da posição atual
                 # ‘Input’ com respetiva segurança
                 while True:
+                    stopt2 = True
                     initialpos = input("Prentende resetar a posição do robot? (s/n) - ")
+                    time.sleep(0.1)
                     if initialpos == "s" or initialpos == "n":
                         break
                     else:
                         print("Insira s ou n, idiota!")
+                stopt2 = False
 
         # Move robot to initialpos if requested
         if initialpos == "s":
@@ -280,7 +329,8 @@ if conSuc:  # Se a conexão for bem sucedida
                 firstrun = False
 
             # Stop the robot if 'q' is pressed
-            if keyboard.is_pressed("q"):
+            if key == "q":
+                key = "None"
                 suc, result, id = ether.sendCMD(sock, "stop")
                 # Try again after cleaning alarm
                 if not suc:
@@ -293,13 +343,17 @@ if conSuc:  # Se a conexão for bem sucedida
                 break
 
             # Start recording if 'g' is pressed
-            if keyboard.is_pressed("g"):
+            if key == "g":
+                key = "None"
                 while True:
-                    gmode = input("Gravação em modo tempo ou pontos no modo JBI? (t/p) - ")
-                    if continua == "t" or continua == "p":
+                    stopt2 = True
+                    gmode = input("Gravação em modo tempo ou pontos no modo JBI? (t/s) - ")
+                    time.sleep(0.1)
+                    if gmode == "t" or gmode == "s":
                         break
                     else:
                         print("Insira t ou p, idiota!")
+                stopt2 = False
                 print("Gravação iniciada")
                 if gmode == "t":
                     print("O programa tirará pontos a cada 2 segundos. Para parar insira 'h'")
@@ -321,7 +375,8 @@ if conSuc:  # Se a conexão for bem sucedida
                         starttime = now  # Reset start time
                         print("Ponto gravado")
                 elif gmode == "p":
-                    if keyboard.is_pressed("f"):
+                    if key == "f":
+                        key = "None"
                         ig += 1
                         firstrungTXT = gravacaoTXT.record(pose_now, firstrungTXT, debug)
                         firstrungJBI, lastrungJBI, ig, g = gravacaoJBI.record(pose_now, firstrungJBI, lastrungJBI,
@@ -329,7 +384,8 @@ if conSuc:  # Se a conexão for bem sucedida
                         print("Ponto gravado")
 
             # Stop recording if 'h' is pressed
-            if keyboard.is_pressed("h"):
+            if key == "h":
+                key = "None"
                 print("Gravação terminada")
                 lastrungJBI = True
                 firstrungJBI, lastrungJBI, ig, g = gravacaoJBI.record(pose_now, firstrungJBI, lastrungJBI,
@@ -337,12 +393,14 @@ if conSuc:  # Se a conexão for bem sucedida
                 g = 0
 
             # Start playing if 'p' is pressed
-            if keyboard.is_pressed("p"):
+            if key == "p":
+                key = "None"
                 print("Play iniciado")
                 p = 1
 
             # Stop recording if '+' is pressed
-            if keyboard.is_pressed("+"):
+            if key == "+":
+                key = "None"
                 print("Play terminado")
                 p = 0
                 i = 6
@@ -385,11 +443,13 @@ if conSuc:  # Se a conexão for bem sucedida
                     pose_now, fichlen = play.play(i, debug)
                     i = 0
                 # Pause the play if 'space' is pressed
-                if keyboard.is_pressed("space"):
+                if key == "space":
+                    key = "None"
                     pause = True
                     print("Play pausado para continuar insira 'space' novamente")
                     while pause:
-                        if keyboard.is_pressed("space"):
+                        if key == "space":
+                            key = "None"
                             pause = False
                             print("Play continuado")
 
@@ -414,6 +474,7 @@ if conSuc:  # Se a conexão for bem sucedida
         # Try again after cleaning alarm
         if not suc:
             suc, result, id = ether.sendCMD(sock, "stop")
+        time.sleep(0.01)
 
 # Desconectar o controlador, a porta serial e o comunicador wifi
 ether.disconnectETController(sock)

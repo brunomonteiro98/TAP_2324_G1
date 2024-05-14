@@ -6,7 +6,6 @@ import json  # Biblioteca para manipulação de ficheiros JSON
 def record(pose_now, firstrung, lastrung, ig, speed, g, debug):
     # Verificar se é a primeira vez que o módulo é corrido
     if firstrung:
-        print("Para parar insira 'h'")
         ficheiro = open("gravacaoJBI.txt", "w")
         firststring = "NOP\n"
         ficheiro.write(firststring)
@@ -28,7 +27,6 @@ def record(pose_now, firstrung, lastrung, ig, speed, g, debug):
                       + "," + str(pose_now[3]) + "," + str(pose_now[4]) + "," + str(pose_now[5]) + "\n")
         elif ig == 255:
             ficheiro.close()  # Fechar o ficheiro
-            print("Gravação terminada")
             lastrung = True
             g = 0
             return firstrung, lastrung, ig, g
