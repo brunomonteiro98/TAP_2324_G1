@@ -6,7 +6,6 @@ import json  # Biblioteca para manipulação de ficheiros JSON
 def record(pose_now, firstrung, debug):
     # Verificar se é a primeira vez que o módulo é corrido
     if firstrung:
-        print("Para parar insira 'h'")
         ficheiro = open("gravacaoTXT.txt", "w")
         pose_now = [pose_now] # Adicionar a nova pose !!!linha super importante!!!
         jdata = json.dumps(pose_now)

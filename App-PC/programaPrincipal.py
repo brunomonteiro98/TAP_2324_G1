@@ -16,16 +16,18 @@ from moduloWifi import WiFiCommunicator  # Biblioteca para comunicação wifi
 # Conectar ao ESP32 por porta serial ou wifi
 # ‘Input’ com respetiva segurança
 while True:
-    sow = input("Conectar ao ESP32 por porta serial ou por wifi? (s/w) - ")
-    time.sleep(0.1)
+    sow = "s"
+    #sow = input("Conectar ao ESP32 por porta serial ou por wifi? (s/w) - ")
+    time.sleep(0.01)
     if sow == "s" or sow == "w":
         break
     else:
         print("Insira s ou w, idiota!")
 match sow:
     case "s":
-        portName = input("Porta COM (Ex:COM2) - ")  # Porta COM do ESP32 (colocar COM2)
-        time.sleep(0.1)
+        portName = "COM2"
+        #portName = input("Porta COM (Ex:COM2) - ")  # Porta COM do ESP32 (colocar COM2)
+        time.sleep(0.01)
         serie.connect_serial_port(portName)  # Conectar à porta serial
     case "w":
         communicator = WiFiCommunicator(max_buffer_sz=128)  # Criar o comunicador WiFi (máximo de 128 bytes)
@@ -38,7 +40,7 @@ conSuc, sock = ether.connectETController(ip)  # Conectar ao controlador
 
 # Velocidade do robô (0-100%)
 speed = int(input("Velocidade do robô (0.05-100%) - "))  # Velocidade do robô
-time.sleep(0.1)
+time.sleep(0.01)
 if speed > 100:  # Se a velocidade for maior que 100%, define a velocidade como 100%
     speed = 100  # Velocidade do robô
 elif speed < 0.05:  # Se a velocidade for menor que 0%, define a velocidade como 0%
@@ -51,7 +53,7 @@ elif speed < 0.05:  # Se a velocidade for menor que 0%, define a velocidade como
 global debug
 while True:
     debug = input("Debug? (s/n) - ")
-    time.sleep(0.1)
+    time.sleep(0.01)
     if debug == "s" or debug == "n":
         break
     else:
@@ -106,9 +108,9 @@ def task2(debug):
                 key = "space"
             elif keyboard.is_pressed("+"):  # Press '+' to stop the play
                 key = "+"
-        time.sleep(0.1)
+        time.sleep(0.01)
     if debug == "s":
-        print("Thread terminada")
+        print("Thread 2 terminada")
 
 
 # Criar a thread e iniciar
@@ -198,7 +200,6 @@ if conSuc:  # Se a conexão for bem sucedida
     g = 0  # Variável para identificar se a gravação corre
     p = 0  # Variável para identificar se o play corre
     i = 0  # Variável para identificar a linha do ficheiro
-    ig = 0  # Variável para identificar o número da posição
     fichlen = 0  # Variável para identificar o número de linhas do ficheiro
     continua = True  # Variável para identificar se o programa deve continuar
     firstrun = True  # Variável para identificar se é a primeira vez que o programa corre
@@ -216,7 +217,7 @@ if conSuc:  # Se a conexão for bem sucedida
         while True:
             stopt2 = True
             initialpos = input("Pretende resetar a posição do robot? (s/n) - ")
-            time.sleep(0.1)
+            time.sleep(0.01)
             if initialpos == "s" or initialpos == "n":
                 break
             else:
@@ -232,7 +233,7 @@ if conSuc:  # Se a conexão for bem sucedida
             while True:
                 stopt2 = True
                 continua = input("Pretende continuar (s/n)? - ")
-                time.sleep(0.1)
+                time.sleep(0.01)
                 if continua == "s" or continua == "n":
                     break
                 print("Insira s ou n, idiota!")
@@ -256,7 +257,7 @@ if conSuc:  # Se a conexão for bem sucedida
                 while True:
                     stopt2 = True
                     initialpos = input("Prentende resetar a posição do robot? (s/n) - ")
-                    time.sleep(0.1)
+                    time.sleep(0.01)
                     if initialpos == "s" or initialpos == "n":
                         break
                     else:
@@ -348,11 +349,11 @@ if conSuc:  # Se a conexão for bem sucedida
                 while True:
                     stopt2 = True
                     gmode = input("Gravação em modo tempo ou pontos no modo JBI? (t/s) - ")
-                    time.sleep(0.1)
+                    time.sleep(0.01)
                     if gmode == "t" or gmode == "s":
                         break
                     else:
-                        print("Insira t ou p, idiota!")
+                        print("Insira t ou s, idiota!")
                 stopt2 = False
                 print("Gravação iniciada")
                 if gmode == "t":
@@ -367,20 +368,18 @@ if conSuc:  # Se a conexão for bem sucedida
                 if gmode == "t":
                     now = time.time()
                     elapsedtime = now - starttime  # Calculate elapsed time
-                    if elapsedtime > 2:  # Record every 2 seconds (capacity is 255 poins, so 8.5 minutes)
-                        ig += 1
-                        firstrungTXT = gravacaoTXT.record(pose_now, firstrungTXT, debug)
-                        firstrungJBI, lastrungJBI, ig, g = gravacaoJBI.record(pose_now, firstrungJBI, lastrungJBI,
-                                                                              ig, g, speed, debug)
+                    if elapsedtime > 2:  # Record every 2 seconds
+                        firstrungTXT = gravacaoTXT.record(p_target, firstrungTXT, debug)
+                        firstrungJBI, lastrungJBI, g = gravacaoJBI.record(p_target, firstrungJBI, lastrungJBI, g,
+                                                                          speed, debug)
                         starttime = now  # Reset start time
                         print("Ponto gravado")
                 elif gmode == "p":
                     if key == "f":
                         key = "None"
-                        ig += 1
-                        firstrungTXT = gravacaoTXT.record(pose_now, firstrungTXT, debug)
-                        firstrungJBI, lastrungJBI, ig, g = gravacaoJBI.record(pose_now, firstrungJBI, lastrungJBI,
-                                                                              ig, g, speed, debug)
+                        firstrungTXT = gravacaoTXT.record(p_target, firstrungTXT, debug)
+                        firstrungJBI, lastrungJBI, g = gravacaoJBI.record(p_target, firstrungJBI, lastrungJBI, g,
+                                                                          speed, debug)
                         print("Ponto gravado")
 
             # Stop recording if 'h' is pressed
@@ -388,8 +387,7 @@ if conSuc:  # Se a conexão for bem sucedida
                 key = "None"
                 print("Gravação terminada")
                 lastrungJBI = True
-                firstrungJBI, lastrungJBI, ig, g = gravacaoJBI.record(pose_now, firstrungJBI, lastrungJBI,
-                                                                      ig, g, speed, debug)
+                firstrungJBI, lastrungJBI, g = gravacaoJBI.record(p_target, firstrungJBI, lastrungJBI, g, speed, debug)
                 g = 0
 
             # Start playing if 'p' is pressed
@@ -474,7 +472,6 @@ if conSuc:  # Se a conexão for bem sucedida
         # Try again after cleaning alarm
         if not suc:
             suc, result, id = ether.sendCMD(sock, "stop")
-        time.sleep(0.01)
 
 # Desconectar o controlador, a porta serial e o comunicador wifi
 ether.disconnectETController(sock)

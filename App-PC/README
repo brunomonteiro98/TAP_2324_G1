@@ -26,59 +26,45 @@ Modulo GravaçãoJBI:
     ... tutorial de como enviar o ficheiro para o robot (notepad++)
 
 Modulo GravaçãoTXT:
-
+    ...
 Modulo Play:
+    ...
 
 To-do:
-
 [] Implementar
-    ![] - Corrigir o pretende continuar? depois do "q" que aparece 2 vezes.
-    ![] - Corrigir o reset da posição que corre x=vorigin antes do getTcppose que vem antes
-    [] - Ifs
-        [] - Para escolher programa gravado (se escolhermos fazer mais do que 1)
-    [] - Modulo Gravação
-        [] - Implementar vários ficheiros se quisermos (input nome ou caminho que vai entrar na função)
-    [] - Redifinir seguranças?
-
+    ![] - Corrigir os problemas de execução (tempos e voltar para trás)
+    [] - Redifinir seguranças? (Não)
 [] Testar
     [] - modulo Wifi
-    [] - modulo Gravação
-        [] - Verificar ficheiro
+    [X] - modulo GravaçãoTXT
+    [] - modulo GravaçãoJBI
+        [X] - Verificar se gravação por tempo dá
+        [] - Verificar se gravação por pontos dá
     [] - modulo Play
         [] - Verificar tempos (time.sleep)
         [] - Verificar play pause
     [] - Ifs
-        [X] - para ir para posição inicial
         [] - para para e iniciar play
+        [X] - para ir para posição inicial
         [X] - para parar o programa
         [X] - limpar erro
     [X] - Input initialpos não aparece quando já na initialpos
-    [] - Threads start and stop
+    [X] - Threads start and stop
     [X] - Termino e reset das threads e do programa
-    [] - Se velocidade do robot influencia delay
     [X] - Verificar o shutdown
-    [] - Incrementos de rotação
     [X] - Testar seguranças inputs
+    [] - Incrementos de rotação
     [] Comunicação já com dados do sensor teste robô (No import do json dar imput trocado se necessário)
-
 [] Verificar e Melhorar
-    [] Verificar a necessidade do reset no modulo play (move by joint qd i=0 (no inicio)) (Vai ser precisa de certeza)
+    [] - Verificar a necessidade do reset no modulo play (move by joint qd i=0 (no inicio)) (Vai ser precisa de certeza)
         if q ==1 ->... Esse thread era chamado no while principal
-    [] Verificar o mveml se é tabela de posições e chega
-    [] Passar para os módulos o mais que conseguir para simplificar o main. (Talvez o calculate position)
+    [] - Passar para os módulos o mais que conseguir para simplificar o main. (Talvez o calculate position)
     [] - Comentar, "limpar" e documentar (este doc) código
     [] - Calibrar aceleração e desaceleração no programaPrincipal mover para posição inicial
-    [] Verificar os events (threads) para o inserir teclas que às vezes não funciona (Events em threds que atualizam g,
-         h, q, p, ...)
-         Opções:
-        investigar usos exemplo já feitos (!!!tirar ideia do listener e aplicar com variáveis já usadas!!! acho que á a mais
-         fácil de implementar) (só não é a mais rápida mas não por muito. Caso seja preciso mais rápido, meter cada parte a
-         correr em outro thread (ver exemplo))
-        meter os keyboars press todos numa função em outro thread e execuatva tudo. Esse thread era chamado no while principal
-        meter os keyboars press todos numa função em outro thread e atualizava por ex: if q -> q=1 e no while principal
 
 Comentários
 - Para não haver delay: Tim send = 20x t sampling do robot 40 para 2 (Teoria: tempo de execução do programa)
 - Delay não depende da velocidade do robô!
 
-"Best way to input keyboard values during a python execution without stopping execution"
+Prioridade: !!! Verificar pq gravação por pontos não dá !!!
+            !!! Testar modulo play !!!
