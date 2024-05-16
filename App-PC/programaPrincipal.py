@@ -309,12 +309,12 @@ if conSuc:  # Se a conexão for bem sucedida
             suc, result, id = ether.sendCMD(sock, "get_transparent_transmission_state")
         if result == 0:
             suc, result, id = ether.sendCMD(sock, "transparent_transmission_init",
-                                            debug, {"lookahead": 200, "t": 2, "smoothness": 1, "response_enable": 1})
+                                            debug, {"lookahead": 400, "t": 10, "smoothness": 0.1, "response_enable": 1})
             # Try again after cleaning alarm
             if not suc:
                 suc, result, id = ether.sendCMD(sock, "transparent_transmission_init",
                                                 debug,
-                                                {"lookahead": 200, "t": 2, "smoothness": 1, "response_enable": 1})
+                                                {"lookahead": 400, "t": 10, "smoothness": 0.1, "response_enable": 1})
         # Set robot's speed
         suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})
         # Try again after cleaning alarm
