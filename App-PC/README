@@ -68,3 +68,6 @@ Comentários
 
 Prioridade: !!! Verificar pq gravação por pontos não dá !!!
             !!! Testar modulo play !!!
+
+Delay de 500ms no programa principal
+Sensor não está a dar incrementos mas posições

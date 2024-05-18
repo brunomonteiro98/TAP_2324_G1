@@ -25,8 +25,8 @@ while True:
         print("Insira s ou w, idiota!")
 match sow:
     case "s":
-        portName = "COM2"
-        #portName = input("Porta COM (Ex:COM2) - ")  # Porta COM do ESP32 (colocar COM2)
+        portName = "COM3"
+        #portName = input("Porta COM (Ex:COM3) - ")  # Porta COM do ESP32
         time.sleep(0.01)
         serie.connect_serial_port(portName)  # Conectar à porta serial
     case "w":
@@ -85,7 +85,6 @@ def task(debug):
         time.sleep(0.01)
     if debug == "s":
         print("Thread terminada")
-
 
 
 def task2(debug):
@@ -321,7 +320,12 @@ if conSuc:  # Se a conexão for bem sucedida
         if not suc:
             suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})
 
+        time1 = time.time()
         while True:
+            time2 = time.time()
+            time3 = time2 - time1
+            print(time3)
+            time1 = time2
             # Print instructions if it is the first run
             if firstrun:
                 print("Para parar insira 'q'")
