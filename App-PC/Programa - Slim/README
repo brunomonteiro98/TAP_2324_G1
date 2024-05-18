@@ -67,6 +67,7 @@ Comentários
 - Delay não depende da velocidade do robô!
 
 Prioridades:
+    !!! Passar a trabalhar com vetores de posições e não com posições individuais !!!
     !!! Verificar o delay deste novo programa !!!
     !!! Verificar pq gravação por pontos não dá !!!
 

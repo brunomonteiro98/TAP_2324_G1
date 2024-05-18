@@ -133,7 +133,6 @@ if conSuc:  # Se a conexão for bem sucedida
 
     # Começa o main "loop"
     while True:
-
         # Pergunta se o utilizador quer continuar após parar (não é necessário na primeira vez)
         if stop:
             continua = input("Pretende continuar (s/n)? - ")
