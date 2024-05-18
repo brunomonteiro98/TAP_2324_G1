@@ -33,14 +33,8 @@ debug = input("Debug? (s/n) - ")
 
 # ==================================================================================================================== #
 
-# Criar a thread para ler os dados do sensor
-global data
-data = [0, 0, 0, 0, 0, 0]  # Inicializar a lista de dados
-global key
-key = "None"  # Variável para identificar a tecla premida
 
-
-# Define a função da thread
+# Definição das funções das threads
 def task():
     global data
     while True:
@@ -68,50 +62,6 @@ t.start()  # Iniciar a thread
 t2 = threading.Thread(target=task2, daemon=True)  # Criar a thread para ler o teclado
 t2.start()  # Iniciar a thread
 
-
-# ==================================================================================================================== #
-
-
-# Calcula a posição do flange após a atualização da entrada do sensor
-# position: lista com as posições atuais
-# angle: lista com os ângulos atuais
-def calculate_position(position: list, angle: list):
-    # Ler os dados do sensor
-    global data
-    if data is None:  # Se não houver dados, retorna 0's
-        ax = 0
-        ay = 0
-        az = 0
-        gx = 0
-        gy = 0
-        gz = 0
-    else:  # Se houver dados
-        ax = data[0]
-        ay = data[1]
-        az = data[2]
-        gx = data[3]
-        gy = data[4]
-        gz = data[5]
-
-    # Calcular a nova posição (verificar + ou - conforme o sensor)
-    new_position_x = position[0] + ax
-    new_position_y = position[1] - az  # Y do robot é o Z do sensor. Tbm está invertido (cresce para baixo)
-    new_position_z = position[2] + ay  # Z do robot é o Y do sensor
-
-    # Calcular o novo ângulo
-    new_angle_x = angle[0] + gx
-    new_angle_y = angle[1] + gy
-    new_angle_z = angle[2] + gz
-
-    # Debug
-    if debug == "s":
-        print("Principal - position, angle:", position, angle)
-        print("Principal - data:", data)
-
-    # Output
-    return new_position_x, new_position_y, new_position_z, new_angle_x, new_angle_y, new_angle_z
-
-
 # ==================================================================================================================== #
 
 if conSuc:  # Se a conexão for bem sucedida
@@ -123,7 +73,7 @@ if conSuc:  # Se a conexão for bem sucedida
     initialpos = "n"  # Variável para identificar se o robô deve ir para a posição inicial
     firstrungJBI = True  # Variável para identificar se é a primeira vez que o modulo gravação corre
     lastrungJBI = False  # Variável para identificar se é a última vez que o modulo gravação corre
-    initialpoint = ([90, -100, 110, -190, 85, 0])  # posição inicial do robô (em joint angles)
+    initialpoint = [90, -100, 110, -190, 85, 0]  # posição inicial do robô (em joint angles)
     # Obter a posição atual do robô
     suc, v_origin, id = ether.sendCMD(sock, "get_joint_pos", debug,
                                       {"unit_type": 0})  # Get robot's current pos (!!!joint!!!). Rotations in degrees.
@@ -165,13 +115,8 @@ if conSuc:  # Se a conexão for bem sucedida
         # Obtain robot's original position and joint angle
         suc, v_origin, id = ether.sendCMD(sock, "get_tcp_pose", debug, {
             "unit_type": 0})  # Get robot's current pose (!!!tool!!!). Rotations in degrees.
-        x_now = v_origin[0]
-        y_now = v_origin[1]
-        z_now = v_origin[2]
-        rx_now = v_origin[3]
-        ry_now = v_origin[4]
-        rz_now = v_origin[5]
-        pose_now = []
+        v_origin = np.array(v_origin)  # Convert to numpy array
+
         # Debug
         if debug == "s":
             print("Principal - v_origin:", v_origin)
@@ -243,10 +188,10 @@ if conSuc:  # Se a conexão for bem sucedida
                 firstrungJBI, lastrungJBI, g = gravacaoJBI.record(p_target, firstrungJBI, lastrungJBI, g, speed, debug)
                 g = 0
 
-            # Get new position and angle based on sensor key value and add it to tt buff
-            x_now, y_now, z_now, rx_now, ry_now, rz_now = calculate_position([x_now, y_now, z_now],
-                                                                             [rx_now, ry_now, rz_now])
-            pose_now = [x_now, y_now, z_now, rx_now, ry_now, rz_now]
+            # Get new pose based on sensor key value and add it to tt buff
+            v_origin = v_origin + data  # Calculate new position (In case it is negative or swapped, see what to do!)
+            pose_now = list(v_origin)  # Convert to list
+
             if debug == "s":
                 print("Principal - pose_now:", pose_now)
 

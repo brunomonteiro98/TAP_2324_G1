@@ -1,12 +1,8 @@
 # Importação das bibliotecas necessárias
 import json  # Biblioteca para manipulação de arquivos json
 import serial  # Biblioteca para comunicação serial
+import numpy as np  # Biblioteca para manipulação de arrays
 
-# ==================================================================================================================== #
-
-
-# Definição da variável global
-global portaSerie
 
 # ==================================================================================================================== #
 
@@ -21,6 +17,7 @@ def connect_serial_port(portName):
     portaSerie.stopbits = 1  # Número de stopbits = 1.
     print('Serial Port Connected')
 
+
 # ==================================================================================================================== #
 
 
@@ -29,21 +26,22 @@ def close_serial_port():
     portaSerie.close()
     print('Serial Port Closed')
 
+
 # ==================================================================================================================== #
 
 
 # Função para ler os dados disponíveis na porta serial
-def read_serial_data(debug="n"):  # Função para ler os dados disponíveis na porta serial
-    if portaSerie.in_waiting == 0:
-        data = None
+def read_serial_data(debug):
+    if portaSerie.in_waiting == 0:  # Se não houver dados disponíveis
+        data = np.zeros(6)  # Cria um array de zeros
         return data
-    else:
+    else:  # Se houver dados disponíveis
         data = portaSerie.readline()  # Lê a linha disponível
         jdata = json.loads(str(data, 'utf-8'))  # Converte a resposta para json
-        data = [(jdata["Item1"]), (jdata["Item2"]), (jdata["Item3"]), (jdata["Item4"]),
-                (jdata["Item5"]), (jdata["Item6"])]
+        data = np.array([(jdata["Item1"]), (jdata["Item2"]), (jdata["Item3"]), (jdata["Item4"]),
+                         (jdata["Item5"]), (jdata["Item6"])])  # Converte a resposta para um array numpy
         if debug == "s":
-            print("Serie - data:", data)  # Imprime a mensagem recebida no terminal para debug
+            print("Serie - data:", data)
         return data
 
 
