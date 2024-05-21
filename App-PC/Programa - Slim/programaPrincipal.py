@@ -38,7 +38,12 @@ debug = input("Debug? (s/n) - ")
 # Definição das funções das threads
 def task():
     global data
+    time1_1 = time.time()
     while True:
+        time2_1 = time.time()
+        time3_1 = time2_1 - time1_1
+        print("Task (Série)", time3_1)
+        time1_1 = time2_1
         data = serie.read_serial_data(debug)  # Ler os dados do sensor
         #time.sleep(0.01)
 
@@ -135,7 +140,7 @@ if conSuc:  # Se a conexão for bem sucedida
         while True:
             time2 = time.time()
             time3 = time2 - time1
-            print(time3)
+            print("Principal", time3)
             time1 = time2
             # Print instructions if it is the first run
             if firstrun:
