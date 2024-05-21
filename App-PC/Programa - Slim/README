@@ -27,15 +27,14 @@ Modulo GravaçãoJBI:
 
 To-do:
 [] Testar
-    [] - modulo GravaçãoJBI
-        [] - Verificar se gravação por tempo dá
-        [] - Verificar se gravação por pontos dá
-    [] - Ifs
-        [] - para ir para posição inicial
-        [] - para parar o programa
-    [] - Input initialpos não aparece quando já na initialpos
-    [] - Verificar o shutdown
-    [] - Incrementos de rotação
+    [X] - modulo GravaçãoJBI
+        [X] - Verificar se gravação por tempo dá
+        [X] - Verificar se gravação por pontos dá
+    [X] - Ifs
+        [X] - para ir para posição inicial
+        [X] - para parar o programa
+    [X] - Input initialpos não aparece quando já na initialpos
+    [X] - Verificar o shutdown
     [] Comunicação já com dados do sensor teste robô (No import do json dar imput trocado se necessário)
 [] Verificar e Melhorar
     [] - Comentar, "limpar" e documentar (este doc) código
@@ -43,9 +42,5 @@ To-do:
 Comentários
 - Para não haver delay: Tim send = 20x t sampling do robot 40 para 2 (Teoria: tempo de execução do programa)
 - Delay não depende da velocidade do robô!
-
-Prioridades:
-    !!! Verificar o delay deste novo programa !!!
-    !!! Verificar pq gravação por pontos não dá !!!
 
 Sensor não está a dar incrementos mas posições

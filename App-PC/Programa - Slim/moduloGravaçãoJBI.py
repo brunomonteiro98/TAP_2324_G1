@@ -25,6 +25,7 @@ def record(p_target, firstrung, lastrung, g, speed, debug):
         laststring = "END"
         ficheiro.write(laststring)
         lastrung = False
+        firstrung = True
         if debug == "s":
             print("Play - laststring:", laststring)
         return firstrung, lastrung, g
