@@ -11,7 +11,7 @@ import moduloGravaçãoJBI as gravacaoJBI  # Biblioteca para gravação de dados
 
 # Conexões
 # Conectar ao ESP32 por porta serial
-portName = "COM2"
+portName = "COM3"
 #portName = input("Porta COM (Ex:COM3) - ")  # Porta COM do ESP32
 serie.connect_serial_port(portName)  # Conectar à porta serial
 
@@ -110,7 +110,7 @@ if conSuc:  # Se a conexão for bem sucedida
 
         if result == 0:
             suc, result, id = ether.sendCMD(sock, "transparent_transmission_init", debug,
-                                            {"lookahead": 400, "t": 10, "smoothness": 0.1, "response_enable": 1})
+                                            {"lookahead": 200, "t": 2, "smoothness": 1, "response_enable": 1})
         # Set robot's speed
         suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})
 
