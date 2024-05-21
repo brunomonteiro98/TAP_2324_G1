@@ -1,0 +1,171 @@
+#include <Wire.h>
+#include <Adafruit_BNO08x.h>
+#include <ArduinoJson.h>
+
+#define BNO08X_RESET -1
+
+Adafruit_BNO08x bno08x(BNO08X_RESET);
+sh2_SensorValue_t sensorValue;
+
+struct euler_t {
+  float yaw;
+  float pitch;
+  float roll;
+} ypr, previousYPR, deltaYPR;
+
+bool originSet = false;
+euler_t originYPR;
+
+#ifdef FAST_MODE
+  sh2_SensorId_t reportType = SH2_GYRO_INTEGRATED_RV;
+  long reportIntervalUs = 2000;
+#else
+  sh2_SensorId_t reportType = SH2_ROTATION_VECTOR;
+  long reportIntervalUs = 5000;
+#endif
+
+void setReports(sh2_SensorId_t reportType, long report_interval) {
+  if (!bno08x.enableReport(reportType, report_interval)) {
+    Serial.println("Could not enable report");
+  }
+}
+
+void quaternionToEuler(float qr, float qi, float qj, float qk, euler_t* ypr, bool degrees = false) {
+  float t = qi; qi = qj; qj = t; qk = -qk;
+
+  float sqr = sq(qr);
+  float sqi = sq(qi);
+  float sqj = sq(qj);
+  float sqk = sq(qk);
+
+  ypr->yaw = atan2(2.0 * (qi * qj + qk * qr), (sqi - sqj - sqk + sqr));
+  ypr->pitch = asin(-2.0 * (qi * qk - qj * qr) / (sqi + sqj + sqk + sqr));
+  ypr->roll = atan2(2.0 * (qj * qk + qi * qr), (-sqi - sqj + sqk + sqr));
+
+  if (degrees) {
+    ypr->yaw *= RAD_TO_DEG;
+    ypr->pitch *= RAD_TO_DEG;
+    ypr->roll *= RAD_TO_DEG;
+  }
+}
+
+void quaternionToEulerGRV(sh2_RotationVector* rotational_vector, euler_t* ypr, bool degrees = false) {
+  quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
+}
+
+void quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, euler_t* ypr, bool degrees = false) {
+  quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
+}
+
+void quaternionToEulerGI(sh2_GyroIntegratedRV_t* rotational_vector, euler_t* ypr, bool degrees = false) {
+  quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
+}
+
+void setOrigin() {
+  if (!originSet && bno08x.getSensorEvent(&sensorValue)) {
+    switch (sensorValue.sensorId) {
+      case SH2_GAME_ROTATION_VECTOR:
+        quaternionToEulerGRV(&sensorValue.un.gameRotationVector, &originYPR, true);
+        break;
+      case SH2_GYRO_INTEGRATED_RV:
+        quaternionToEulerGI(&sensorValue.un.gyroIntegratedRV, &originYPR, true);
+        break;
+      case SH2_ROTATION_VECTOR:
+        quaternionToEulerRV(&sensorValue.un.rotationVector, &originYPR, true);
+        break;
+    }
+    originSet = true;
+  }
+}
+
+void setup() {
+  // Begin I2C communications:
+  Wire.begin();
+  delay(50);
+
+  // IMU init:
+  bno08x.begin_I2C();
+
+  delay(10);
+  setReports(reportType, reportIntervalUs);
+
+  // Serial for testing
+  Serial.begin(9600);
+
+  delay(500);
+}
+
+void loop() {
+  // Set origin if not already set
+  if (!originSet) {
+    setOrigin();
+    return; // Exit loop until origin is set
+  }
+
+  delay(10);
+  // Read IMU.
+  if (bno08x.getSensorEvent(&sensorValue)) {
+    // Store previous YPR values
+    previousYPR = ypr;
+
+    // Update current YPR values
+    switch (sensorValue.sensorId) {
+      case SH2_GAME_ROTATION_VECTOR:
+        quaternionToEulerGRV(&sensorValue.un.gameRotationVector, &ypr, true);
+        break;
+      case SH2_GYRO_INTEGRATED_RV:
+        quaternionToEulerGI(&sensorValue.un.gyroIntegratedRV, &ypr, true);
+        break;
+      case SH2_ROTATION_VECTOR:
+        quaternionToEulerRV(&sensorValue.un.rotationVector, &ypr, true);
+        break;
+    }
+
+    // Calculate relative Euler angles from origin
+    ypr.yaw -= originYPR.yaw;
+    ypr.pitch -= originYPR.pitch;
+    ypr.roll -= originYPR.roll;
+
+    // Calculate increments (changes) from the previous readings
+    deltaYPR.yaw = ypr.yaw - previousYPR.yaw;
+    deltaYPR.pitch = ypr.pitch - previousYPR.pitch;
+    deltaYPR.roll = ypr.roll - previousYPR.roll;
+
+    if (abs(deltaYPR.yaw) < 0.01 ) {
+      deltaYPR.yaw = 0;
+    } else if (abs(deltaYPR.yaw) > 10) {
+      deltaYPR.yaw = 10;
+    }
+
+    if (abs(deltaYPR.pitch) < 0.01 ) {
+      deltaYPR.pitch = 0;
+    } else if (abs(deltaYPR.pitch) > 10) {
+      deltaYPR.pitch = 10;
+    }
+
+    if (abs(deltaYPR.roll) < 0.01 ) {
+      deltaYPR.roll = 0;
+    } else if (abs(deltaYPR.roll) > 10) {
+      deltaYPR.roll = 10;
+    }
+
+  }  
+
+  // Create a JSON object
+  StaticJsonDocument<200> doc;
+
+  // Add data to the JSON object
+  doc["Item1"] = 0;
+  doc["Item2"] = 0;
+  doc["Item3"] = 0;
+  doc["Item4"] = deltaYPR.yaw;
+  doc["Item5"] = deltaYPR.roll;
+  doc["Item6"] = deltaYPR.pitch;
+
+  // Serialize the JSON object to a string
+  String jsonString;
+  serializeJson(doc, jsonString);
+
+  // Send the JSON string over serial
+  Serial.println(jsonString);
+}
