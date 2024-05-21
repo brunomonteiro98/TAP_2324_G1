@@ -41,27 +41,9 @@ def task():
         data = serie.read_serial_data(debug)  # Ler os dados do sensor
         time.sleep(0.01)
 
-
-def task2():
-    global key
-    key = "None"
-    while True:
-        if keyboard.is_pressed("q"):  # Press 'q' to stop the program
-            key = "q"
-        elif keyboard.is_pressed("g"):  # Press 'g' to start recording
-            key = "g"
-        elif keyboard.is_pressed("h"):  # Press 'h' to stop recording
-            key = "h"
-        elif keyboard.is_pressed("f"):  # Press 'f' to record a point
-            key = "f"
-        time.sleep(0.05)
-
-
 # Criar a thread e iniciar
 t = threading.Thread(target=task, daemon=True)  # Criar a thread para ler os dados do sensor
 t.start()  # Iniciar a thread
-t2 = threading.Thread(target=task2, daemon=True)  # Criar a thread para ler o teclado
-t2.start()  # Iniciar a thread
 
 # ==================================================================================================================== #
 
@@ -137,26 +119,26 @@ if conSuc:  # Se a conexão for bem sucedida
             if firstrun:
                 print("Para parar insira 'q'")
                 print("Para gravar insira 'g'")
-                print("Para play insira 'p'")
                 firstrun = False
 
             # Stop the robot if 'q' is pressed
-            if key == "q":
-                key = "None"
+            if keyboard.is_pressed("q"):
+                time.sleep(0.1)
                 suc, result, id = ether.sendCMD(sock, "stop")
                 suc, result, id = ether.sendCMD(sock, "tt_clear_servo_joint_buf", debug, {"clear": 0})
                 stop = True
                 break
 
             # Start recording if 'g' is pressed
-            if key == "g":
-                key = "None"
+            if keyboard.is_pressed("g"):
+                time.sleep(0.1)
                 gmode = input("Gravação em modo tempo ou pontos no modo JBI? (t/p) - ")
                 print("Gravação iniciada")
                 if gmode == "t":
                     print("O programa tirará pontos a cada 2 segundos. Para parar insira 'h'")
                 elif gmode == "p":
                     print("O programa tirará pontos sempre que 'f' for premido. Para parar insira 'h'")
+                    print("Atenção: 1º ponto não conta")
                 g = 1
                 starttime = time.time()
 
@@ -171,15 +153,15 @@ if conSuc:  # Se a conexão for bem sucedida
                         starttime = now  # Reset start time
                         print("Ponto gravado")
                 elif gmode == "p":
-                    if key == "f":
-                        key = "None"
+                    if keyboard.is_pressed("f"):
+                        time.sleep(0.1)
                         firstrungJBI, lastrungJBI, g = gravacaoJBI.record(p_target, firstrungJBI, lastrungJBI, g, speed,
                                                                           debug)
                         print("Ponto gravado")
 
             # Stop recording if 'h' is pressed
-            if key == "h":
-                key = "None"
+            if keyboard.is_pressed("h"):
+                time.sleep(0.1)
                 print("Gravação terminada")
                 lastrungJBI = True
                 firstrungJBI, lastrungJBI, g = gravacaoJBI.record(p_target, firstrungJBI, lastrungJBI, g, speed, debug)
