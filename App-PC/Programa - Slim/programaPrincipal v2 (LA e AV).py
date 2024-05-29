@@ -11,7 +11,7 @@ import moduloGravaçãoJBI as gravacaoJBI  # Biblioteca para gravação de dados
 
 # Conexões
 # Conectar ao ESP32 por porta serial
-portName = "COM2"
+portName = "COM3"
 #portName = input("Porta COM (Ex:COM3) - ")  # Porta COM do ESP32
 serie.connect_serial_port(portName)  # Conectar à porta serial
 
@@ -41,27 +41,31 @@ def task():
         data = serie.read_serial_data(debug)  # Ler os dados do sensor
         time.sleep(0.01)
 
-
-def task2():
-    global key
-    key = "None"
-    while True:
-        if keyboard.is_pressed("q"):  # Press 'q' to stop the program
-            key = "q"
-        elif keyboard.is_pressed("g"):  # Press 'g' to start recording
-            key = "g"
-        elif keyboard.is_pressed("h"):  # Press 'h' to stop recording
-            key = "h"
-        elif keyboard.is_pressed("f"):  # Press 'f' to record a point
-            key = "f"
-        time.sleep(0.05)
-
-
 # Criar a thread e iniciar
 t = threading.Thread(target=task, daemon=True)  # Criar a thread para ler os dados do sensor
 t.start()  # Iniciar a thread
-t2 = threading.Thread(target=task2, daemon=True)  # Criar a thread para ler o teclado
-t2.start()  # Iniciar a thread
+
+# ==================================================================================================================== #
+
+
+# calculate flange position after input (-1 to 1) updated (input value used as acceleration for linear movement and
+# speed for angular movement)
+def calculate_position(data, t, speed: list, position: list):
+    new_speed_x = speed[0] + 100 * data[0] * t # 300 is the acceleration of the flange
+    new_speed_y = speed[1] + 100 * data[1] * t
+    new_speed_z = speed[2] + 100 * data[2] * t
+    new_position_x = position[0] + new_speed_x * t
+    new_position_y = position[1] + new_speed_y * t
+    new_position_z = position[2] + new_speed_z * t
+    # new_position_gx = position[3] + 300 * data[3] * t
+    # new_position_gy = position[4] + 300 * data[4] * t
+    # new_position_gz = position[5] + 300 * data[5] * t
+    new_position_gx = position[3] + data[3]
+    new_position_gy = position[4] + data[4]
+    new_position_gz = position[5] + data[5]
+    speedCP = [new_speed_x, new_speed_y, new_speed_z]
+    positionCP = [new_position_x, new_position_y, new_position_z, new_position_gx, new_position_gy, new_position_gz]
+    return speedCP, positionCP
 
 # ==================================================================================================================== #
 
@@ -76,6 +80,10 @@ if conSuc:  # Se a conexão for bem sucedida
     firstrungJBI = True  # Variável para identificar se é a primeira vez que o modulo gravação corre
     lastrungJBI = False  # Variável para identificar se é a última vez que o modulo gravação corre
     initialpoint = [90, -100, 110, -190, 85, 0]  # posição inicial do robô (em joint angles)
+
+    # Set robot's speed
+    suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})
+
     # Obter a posição atual do robô
     suc, v_origin, id = ether.sendCMD(sock, "get_joint_pos", debug,
                                       {"unit_type": 0})  # Get robot's current pos (!!!joint!!!). Rotations in degrees.
@@ -85,6 +93,8 @@ if conSuc:  # Se a conexão for bem sucedida
 
     # Começa o main "loop"
     while True:
+        speedCP = [0, 0, 0]  # Velocidade para o cálculo da posição
+
         # Pergunta se o utilizador quer continuar após parar (não é necessário na primeira vez)
         if stop:
             continua = input("Pretende continuar (s/n)? - ")
@@ -117,7 +127,7 @@ if conSuc:  # Se a conexão for bem sucedida
         # Obtain robot's original position and joint angle
         suc, v_origin, id = ether.sendCMD(sock, "get_tcp_pose", debug, {
             "unit_type": 0})  # Get robot's current pose (!!!tool!!!). Rotations in degrees.
-        v_origin = np.array(v_origin)  # Convert to numpy array
+        # v_origin = np.array(v_origin)  # Convert to numpy array
 
         # Debug
         if debug == "s":
@@ -128,35 +138,37 @@ if conSuc:  # Se a conexão for bem sucedida
 
         if result == 0:
             suc, result, id = ether.sendCMD(sock, "transparent_transmission_init", debug,
-                                            {"lookahead": 400, "t": 10, "smoothness": 0.1, "response_enable": 1})
-        # Set robot's speed
-        suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})
+                                            {"lookahead": 200, "t": 2, "smoothness": 0.1, "response_enable": 1})
 
+        time1 = time.time()
         while True:
+            time2 = time.time()
+            t = time2 - time1
+            time1 = time2
             # Print instructions if it is the first run
             if firstrun:
                 print("Para parar insira 'q'")
                 print("Para gravar insira 'g'")
-                print("Para play insira 'p'")
                 firstrun = False
 
             # Stop the robot if 'q' is pressed
-            if key == "q":
-                key = "None"
+            if keyboard.is_pressed("q"):
+                time.sleep(0.1)
                 suc, result, id = ether.sendCMD(sock, "stop")
                 suc, result, id = ether.sendCMD(sock, "tt_clear_servo_joint_buf", debug, {"clear": 0})
                 stop = True
                 break
 
             # Start recording if 'g' is pressed
-            if key == "g":
-                key = "None"
+            if keyboard.is_pressed("g"):
+                time.sleep(0.1)
                 gmode = input("Gravação em modo tempo ou pontos no modo JBI? (t/p) - ")
                 print("Gravação iniciada")
                 if gmode == "t":
                     print("O programa tirará pontos a cada 2 segundos. Para parar insira 'h'")
                 elif gmode == "p":
                     print("O programa tirará pontos sempre que 'f' for premido. Para parar insira 'h'")
+                    print("Atenção: 1º ponto não conta")
                 g = 1
                 starttime = time.time()
 
@@ -171,23 +183,27 @@ if conSuc:  # Se a conexão for bem sucedida
                         starttime = now  # Reset start time
                         print("Ponto gravado")
                 elif gmode == "p":
-                    if key == "f":
-                        key = "None"
+                    if keyboard.is_pressed("f"):
+                        time.sleep(0.1)
                         firstrungJBI, lastrungJBI, g = gravacaoJBI.record(p_target, firstrungJBI, lastrungJBI, g, speed,
                                                                           debug)
                         print("Ponto gravado")
 
             # Stop recording if 'h' is pressed
-            if key == "h":
-                key = "None"
+            if keyboard.is_pressed("h"):
+                time.sleep(0.1)
                 print("Gravação terminada")
                 lastrungJBI = True
                 firstrungJBI, lastrungJBI, g = gravacaoJBI.record(p_target, firstrungJBI, lastrungJBI, g, speed, debug)
                 g = 0
 
+            # # Get new pose based on sensor key value and add it to tt buff
+            # v_origin = v_origin + data  # Calculate new position (In case of negative or swapped, change in moduloSerie)
+            # pose_now = list(v_origin)  # Convert to list
+
             # Get new pose based on sensor key value and add it to tt buff
-            v_origin = v_origin + data  # Calculate new position (In case it is negative or swapped, see what to do!)
-            pose_now = list(v_origin)  # Convert to list
+            speedCP, v_origin = calculate_position(data, 0.05, speedCP, v_origin)
+            pose_now = v_origin
 
             if debug == "s":
                 print("Principal - pose_now:", pose_now)

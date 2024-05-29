@@ -2,6 +2,9 @@ import socket
 import json
 import time
 
+#v1.2
+
+
 def connectETController(ip,port=8055):
   sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   sock.settimeout(2)

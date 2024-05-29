@@ -3,7 +3,7 @@ import time  # Biblioteca para manipulação de tempo
 import keyboard  # Biblioteca para manipulação de teclado
 import threading  # Biblioteca para manipulação de threads
 import numpy as np  # Biblioteca para manipulação de arrays
-import moduloSerie as serie  # Biblioteca para comunicação serial
+import moduloSerieJSON as serie  # Biblioteca para comunicação serial
 import moduloEthernet as ether  # Biblioteca para comunicação Ethernet
 import moduloGravaçãoJBI as gravacaoJBI  # Biblioteca para gravação de dados
 
@@ -58,6 +58,10 @@ if conSuc:  # Se a conexão for bem sucedida
     firstrungJBI = True  # Variável para identificar se é a primeira vez que o modulo gravação corre
     lastrungJBI = False  # Variável para identificar se é a última vez que o modulo gravação corre
     initialpoint = [90, -100, 110, -190, 85, 0]  # posição inicial do robô (em joint angles)
+
+    # Set robot's speed
+    suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})
+
     # Obter a posição atual do robô
     suc, v_origin, id = ether.sendCMD(sock, "get_joint_pos", debug,
                                       {"unit_type": 0})  # Get robot's current pos (!!!joint!!!). Rotations in degrees.
@@ -111,8 +115,6 @@ if conSuc:  # Se a conexão for bem sucedida
         if result == 0:
             suc, result, id = ether.sendCMD(sock, "transparent_transmission_init", debug,
                                             {"lookahead": 200, "t": 2, "smoothness": 1, "response_enable": 1})
-        # Set robot's speed
-        suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})
 
         while True:
             # Print instructions if it is the first run
@@ -168,7 +170,7 @@ if conSuc:  # Se a conexão for bem sucedida
                 g = 0
 
             # Get new pose based on sensor key value and add it to tt buff
-            v_origin = v_origin + data  # Calculate new position (In case it is negative or swapped, see what to do!)
+            v_origin = v_origin + data  # Calculate new position (In case of negative or swapped, change in moduloSerie)
             pose_now = list(v_origin)  # Convert to list
 
             if debug == "s":

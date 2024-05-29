@@ -5,19 +5,21 @@ import serial  # Biblioteca para comunicação serial
 # Definição da variável global
 global portaSerie
 
-portName=input("Digite a porta serial: ")
+portName="COM3"
 portaSerie = serial.Serial(portName)
-portaSerie.baudrate = 9600
+portaSerie.baudrate = 115200
 portaSerie.bytesize = 8
 portaSerie.parity = 'N'
 portaSerie.stopbits = 1
 print('Serial Port Connected')
 
-debug=input("Debug (s/n): ")
 while True:
     data = portaSerie.readline()
-    jdata = json.loads(str(data, 'utf-8'))
-    data = [(jdata["Item1"]), (jdata["Item2"]), (jdata["Item3"]), (jdata["Item4"]),
-            (jdata["Item5"]), (jdata["Item6"])]
-    if debug == "s":
-        print("Serie - data:", data)
+    if data.startswith(b"S"):
+        data = data.lstrip(b"S")
+        data = data.rstrip(b"\r\n")
+        data = data.decode("utf-8")
+        data = data.split(",")
+        data = [-float(data[1]), -float(data[0]), -float(data[2]), float(data[4]),
+                float(data[3]), float(data[5])]
+        print(data)

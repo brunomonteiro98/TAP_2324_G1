@@ -7,7 +7,7 @@ global portaSerie
 
 portName="COM3"
 portaSerie = serial.Serial(portName)
-portaSerie.baudrate = 9600
+portaSerie.baudrate = 115200
 portaSerie.bytesize = 8
 portaSerie.parity = 'N'
 portaSerie.stopbits = 1
@@ -15,10 +15,7 @@ print('Serial Port Connected')
 
 while True:
     data = portaSerie.readline()
-    if data.startswith(b"S"):
-        data = data.lstrip(b"S")
-        data = data.rstrip(b"\r\n")
-        data = data.decode("utf-8")
-        split_data = data.split(",")
-        print("Item1:", split_data[0], "Item2:", split_data[1], "Item3:", split_data[2], "Item4:", split_data[3],
-              "Item5:", split_data[4], "Item6:", split_data[5])
+    jdata = json.loads(str(data, 'utf-8'))
+    data = [(jdata["Item1"]), (jdata["Item2"]), (jdata["Item3"]), (jdata["Item4"]),
+            (jdata["Item5"]), (jdata["Item6"])]
+    print(data)
