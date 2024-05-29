@@ -5,12 +5,6 @@
 #define BNO08X_INT 9
 #define BNO08X_RESET -1
 
-struct euler_t {
-  float yaw;
-  float pitch;
-  float roll;
-} ypr;
-
 Adafruit_BNO08x  bno08x(BNO08X_RESET);
 sh2_SensorValue_t sensorValue;
 
@@ -117,11 +111,11 @@ void loop() {
     float laay = lay * 0.1;
     float laaz = laz * 0.1;
 
+    static long last = 0;
+    long now = micros();
+    last = now;
     // Para debug
-    // static long last = 0;
-    // long now = micros();
     // Serial.println("Execution time: ", now - last);
-    // last = now;
     // String send;
     // send = "Accuracy (0-3): " + String(sensorValue.status);
     // Serial.println(send);
@@ -135,26 +129,8 @@ void loop() {
     // Serial.println(send);  
     // delay(1000);
 
-    // Create a JSON object
-    //StaticJsonDocument<200> doc;
-
-    // Add data to the JSON object
-    //doc["Item1"] = bx;
-    //doc["Item2"] = by;
-    //doc["Item3"] = bz;
-    //doc["Item4"] = gz;
-    //doc["Item5"] = gy;
-    //doc["Item6"] = gx;
-
-    // Serialize the JSON object to a string
-    //String jsonString;
-    //serializeJson(doc, jsonString);
-
-    // send the JSON string over serial
-    //Serial.println(jsonString);
-
     String data;
-    data = "S" + String(laax) + "," + String(laay) + "," + String(laaz) + "," + String(avax) + "," + String(avay) + "," + String(avaz);
+    data = String(laax) + "," + String(laay) + "," + String(laaz) + "," + String(avax) + "," + String(avay) + "," + String(avaz) + "," + String(now - last);
     Serial.println(data);
   }
 }

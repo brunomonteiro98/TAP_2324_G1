@@ -175,11 +175,11 @@ void loop() {
     // float cy = deltaYPR.pitch * 0.1;
     // float cz = deltaYPR.roll * 0.1;
 
+    static long last = 0;
+    long now = micros();
+    last = now;
     // Para debug
-    // static long last = 0;
-    // long now = micros();
     // Serial.println("Execution time: ", now - last);
-    // last = now;
     // String send;
     // send = "Accuracy (0-3): " + String(sensorValue.status);
     // Serial.println(send);
@@ -195,26 +195,8 @@ void loop() {
     // Serial.println(send); 
     // delay(1000);
 
-    // Create a JSON object
-    //StaticJsonDocument<200> doc;
-
-    // Add data to the JSON object
-    //doc["Item1"] = laax;
-    //doc["Item2"] = laay;
-    //doc["Item3"] = laaz;
-    //doc["Item4"] = deltaYPR.yaw;
-    //doc["Item5"] = deltaYPR.pitch;
-    //doc["Item6"] = deltaYPR.roll;
-
-    // Serialize the JSON object to a string
-    //String jsonString;
-    //serializeJson(doc, jsonString);
-
-    // Send the JSON string over serial
-    //Serial.println(jsonString);
-
     String data;
-    data = "S" + String(laax) + "," + String(laay) + "," + String(laaz) + "," + String(deltaYPR.yaw) + "," + String(deltaYPR.pitch) + "," + String(deltaYPR.roll);
+    data = String(laax) + "," + String(laay) + "," + String(laaz) + "," + String(deltaYPR.yaw) + "," + String(deltaYPR.pitch) + "," + String(deltaYPR.roll) + "," + String(now - last);
     Serial.println(data);
   }
 }

@@ -3,7 +3,7 @@ import time  # Biblioteca para manipulação de tempo
 import keyboard  # Biblioteca para manipulação de teclado
 import threading  # Biblioteca para manipulação de threads
 import numpy as np  # Biblioteca para manipulação de arrays
-import moduloSerieJSON as serie  # Biblioteca para comunicação serial
+import moduloSerie as serie  # Biblioteca para comunicação serial
 import moduloEthernet as ether  # Biblioteca para comunicação Ethernet
 import moduloGravaçãoJBI as gravacaoJBI  # Biblioteca para gravação de dados
 
@@ -44,6 +44,26 @@ def task():
 # Criar a thread e iniciar
 t = threading.Thread(target=task, daemon=True)  # Criar a thread para ler os dados do sensor
 t.start()  # Iniciar a thread
+
+# ==================================================================================================================== #
+
+
+# calculate flange position after input (-1 to 1) updated (input value used as acceleration for linear movement and
+# speed for angular movement)
+def calculate_position(data, speed: list, position: list):
+    new_speed_x = speed[0] + 300 * data[0] * data[6]  # 300 is the acceleration of the flange
+    new_speed_y = speed[1] + 300 * data[1] * data[6]
+    new_speed_z = speed[2] + 300 * data[2] * data[6]
+    new_position_x = position[0] + new_speed_x * data[6]
+    new_position_y = position[1] + new_speed_y * data[6]
+    new_position_z = position[2] + new_speed_z * data[6]
+    new_position_gx = position[3] + data[3]
+    new_position_gy = position[4] + data[4]
+    new_position_gz = position[5] + data[5]
+    speedCP = [new_speed_x, new_speed_y, new_speed_z]
+    positionCP = [new_position_x, new_position_y, new_position_z, new_position_gx, new_position_gy, new_position_gz]
+    return speedCP, positionCP
+
 
 # ==================================================================================================================== #
 
@@ -103,7 +123,6 @@ if conSuc:  # Se a conexão for bem sucedida
         # Obtain robot's original position and joint angle
         suc, v_origin, id = ether.sendCMD(sock, "get_tcp_pose", debug, {
             "unit_type": 0})  # Get robot's current pose (!!!tool!!!). Rotations in degrees.
-        v_origin = np.array(v_origin)  # Convert to numpy array
 
         # Debug
         if debug == "s":
@@ -117,6 +136,8 @@ if conSuc:  # Se a conexão for bem sucedida
                                             {"lookahead": 200, "t": 2, "smoothness": 1, "response_enable": 1})
 
         while True:
+            speedCP = [0, 0, 0]  # Velocidade para o cálculo da posição
+
             # Print instructions if it is the first run
             if firstrun:
                 print("Para parar insira 'q'")
@@ -170,8 +191,8 @@ if conSuc:  # Se a conexão for bem sucedida
                 g = 0
 
             # Get new pose based on sensor key value and add it to tt buff
-            v_origin = v_origin + data  # Calculate new position (In case of negative or swapped, change in moduloSerie)
-            pose_now = list(v_origin)  # Convert to list
+            speedCP, v_origin = calculate_position(data, speedCP, v_origin)
+            pose_now = v_origin
 
             if debug == "s":
                 print("Principal - pose_now:", pose_now)

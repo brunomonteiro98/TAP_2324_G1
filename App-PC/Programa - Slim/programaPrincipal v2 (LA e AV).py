@@ -51,18 +51,15 @@ t.start()  # Iniciar a thread
 # calculate flange position after input (-1 to 1) updated (input value used as acceleration for linear movement and
 # speed for angular movement)
 def calculate_position(data, t, speed: list, position: list):
-    new_speed_x = speed[0] + 100 * data[0] * t # 300 is the acceleration of the flange
-    new_speed_y = speed[1] + 100 * data[1] * t
-    new_speed_z = speed[2] + 100 * data[2] * t
-    new_position_x = position[0] + new_speed_x * t
-    new_position_y = position[1] + new_speed_y * t
-    new_position_z = position[2] + new_speed_z * t
-    # new_position_gx = position[3] + 300 * data[3] * t
-    # new_position_gy = position[4] + 300 * data[4] * t
-    # new_position_gz = position[5] + 300 * data[5] * t
-    new_position_gx = position[3] + data[3]
-    new_position_gy = position[4] + data[4]
-    new_position_gz = position[5] + data[5]
+    new_speed_x = speed[0] + 300 * data[0] * data[6]  # 300 is the acceleration of the flange
+    new_speed_y = speed[1] + 300 * data[1] * data[6]
+    new_speed_z = speed[2] + 300 * data[2] * data[6]
+    new_position_x = position[0] + new_speed_x * data[6]
+    new_position_y = position[1] + new_speed_y * data[6]
+    new_position_z = position[2] + new_speed_z * data[6]
+    new_position_gx = position[3] + data[3] * data[6]
+    new_position_gy = position[4] + data[4] * data[6]
+    new_position_gz = position[5] + data[5] * data[6]
     speedCP = [new_speed_x, new_speed_y, new_speed_z]
     positionCP = [new_position_x, new_position_y, new_position_z, new_position_gx, new_position_gy, new_position_gz]
     return speedCP, positionCP
@@ -127,7 +124,6 @@ if conSuc:  # Se a conexão for bem sucedida
         # Obtain robot's original position and joint angle
         suc, v_origin, id = ether.sendCMD(sock, "get_tcp_pose", debug, {
             "unit_type": 0})  # Get robot's current pose (!!!tool!!!). Rotations in degrees.
-        # v_origin = np.array(v_origin)  # Convert to numpy array
 
         # Debug
         if debug == "s":
@@ -197,12 +193,8 @@ if conSuc:  # Se a conexão for bem sucedida
                 firstrungJBI, lastrungJBI, g = gravacaoJBI.record(p_target, firstrungJBI, lastrungJBI, g, speed, debug)
                 g = 0
 
-            # # Get new pose based on sensor key value and add it to tt buff
-            # v_origin = v_origin + data  # Calculate new position (In case of negative or swapped, change in moduloSerie)
-            # pose_now = list(v_origin)  # Convert to list
-
             # Get new pose based on sensor key value and add it to tt buff
-            speedCP, v_origin = calculate_position(data, 0.05, speedCP, v_origin)
+            speedCP, v_origin = calculate_position(data, speedCP, v_origin)
             pose_now = v_origin
 
             if debug == "s":

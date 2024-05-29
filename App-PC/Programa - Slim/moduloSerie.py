@@ -29,13 +29,10 @@ def read_serial_data(debug="n"):  # Função para ler os dados disponíveis na p
         data = None
         return data
     else:
-        data = portaSerie.readline()
-        if data.startswith(b"S"):
-            data = data.lstrip(b"S")
-            data = data.rstrip(b"\r\n")
-            data = data.decode("utf-8")
-            data = data.split(",")
-            data = [-float(data[1]), float(data[0]), float(data[2]), 0, 0, 0]
+        data = portaSerie.readline().decode('utf-8').rstrip()
+        data = data.split(',')
+        data = [-float(data[1]), -float(data[0]), -float(data[2]), float(data[4]), float(data[3]), float(data[5]),
+                float(data[6])]
         if debug == "s":
             print("Serie - data:", data)  # Imprime a mensagem recebida no terminal para debug
         return data
