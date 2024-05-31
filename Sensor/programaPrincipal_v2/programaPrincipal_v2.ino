@@ -44,8 +44,8 @@ void loop() {
 
   if (bno08x.wasReset()) {
     Serial.print("sensor was reset ");
-    setReports(reportTypeGC, reportIntervalUsGC);
     setReports(reportTypeLA, reportIntervalUsLA);
+    setReports(reportTypeAV, reportIntervalUsAV);
   }
 
   if (bno08x.getSensorEvent(&sensorValue)) {

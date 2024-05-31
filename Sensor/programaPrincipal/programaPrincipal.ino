@@ -143,9 +143,9 @@ void loop() {
     deltaYPR.roll = ypr.roll - previousYPR.roll;
 
     // Store previous rotation vector values
-    previousYPR.yaw = ypr.yaw
-    previousYPR.pitch = ypr.pitch
-    previousYPR.roll = ypr.roll
+    previousYPR.yaw = ypr.yaw;
+    previousYPR.pitch = ypr.pitch;
+    previousYPR.roll = ypr.roll;
 
     // // Low pass filter for increments
     // if (abs(deltaYPR.yaw) < 0.01 ) {
