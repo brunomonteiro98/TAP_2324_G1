@@ -1,6 +1,6 @@
 # Importação das bibliotecas necessárias
-import json  # Biblioteca para manipulação de arquivos json
 import serial  # Biblioteca para comunicação serial
+import numpy as np  # Biblioteca para manipulação de arrays
 
 # Definição da variável global
 global portaSerie
@@ -25,14 +25,11 @@ def close_serial_port():
 
 # Função para ler os dados disponíveis na porta serial
 def read_serial_data(debug="n"):  # Função para ler os dados disponíveis na porta serial
-    if portaSerie.in_waiting == 0:
-        data = None
-        return data
-    else:
-        data = portaSerie.readline().decode('utf-8').rstrip()
+    if not portaSerie.in_waiting == 0:  # Se houver dados disponíveis
+        data = portaSerie.readline()
+        data = data.decode('utf-8').rstrip()
         data = data.split(',')
-        data = [-float(data[1]), -float(data[0]), -float(data[2]), float(data[4]), float(data[3]), float(data[5]),
-                float(data[6])]
+        data = np.array([0, 0, 0, float(data[3]), float(data[5]), float(data[4])])
         if debug == "s":
             print("Serie - data:", data)  # Imprime a mensagem recebida no terminal para debug
         return data

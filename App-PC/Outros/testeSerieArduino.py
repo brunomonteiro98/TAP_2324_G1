@@ -15,8 +15,7 @@ print('Serial Port Connected')
 
 while True:
     data = portaSerie.readline()
-    data = portaSerie.readline().decode('utf-8').rstrip()
+    data = data.decode('utf-8').rstrip()
     data = data.split(',')
-    data = [-float(data[1]), -float(data[0]), -float(data[2]), float(data[4]), float(data[3]), float(data[5]),
-            float(data[6])]
+    data = [0, 0, 0, float(data[3]), float(data[5]), float(data[4])]  # [x, y, z, roll, pitch, yaw] Não adicionar z!
     print(data)

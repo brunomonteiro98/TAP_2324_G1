@@ -47,25 +47,6 @@ t.start()  # Iniciar a thread
 
 # ==================================================================================================================== #
 
-
-# calculate flange position after input (-1 to 1) updated (input value used as acceleration for linear movement and
-# speed for angular movement)
-def calculate_position(data, t, speed: list, position: list):
-    new_speed_x = speed[0] + 300 * data[0] * data[6]  # 300 is the acceleration of the flange
-    new_speed_y = speed[1] + 300 * data[1] * data[6]
-    new_speed_z = speed[2] + 300 * data[2] * data[6]
-    new_position_x = position[0] + new_speed_x * data[6]
-    new_position_y = position[1] + new_speed_y * data[6]
-    new_position_z = position[2] + new_speed_z * data[6]
-    new_position_gx = position[3] + data[3] * data[6]
-    new_position_gy = position[4] + data[4] * data[6]
-    new_position_gz = position[5] + data[5] * data[6]
-    speedCP = [new_speed_x, new_speed_y, new_speed_z]
-    positionCP = [new_position_x, new_position_y, new_position_z, new_position_gx, new_position_gy, new_position_gz]
-    return speedCP, positionCP
-
-# ==================================================================================================================== #
-
 if conSuc:  # Se a conexão for bem sucedida
 
     # Definição de variáveis
@@ -76,7 +57,8 @@ if conSuc:  # Se a conexão for bem sucedida
     initialpos = "n"  # Variável para identificar se o robô deve ir para a posição inicial
     firstrungJBI = True  # Variável para identificar se é a primeira vez que o modulo gravação corre
     lastrungJBI = False  # Variável para identificar se é a última vez que o modulo gravação corre
-    initialpoint = [90, -100, 110, -190, 85, 0]  # posição inicial do robô (em joint angles)
+    # initialpoint = [90, -100, 110, -190, 85, 0]  # posição inicial do robô (em joint angles)
+    initialpoint = [90, -100, 110, 0, 0, 0]  # posição inicial do robô (em joint angles)
 
     # Set robot's speed
     suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})
@@ -90,8 +72,6 @@ if conSuc:  # Se a conexão for bem sucedida
 
     # Começa o main "loop"
     while True:
-        speedCP = [0, 0, 0]  # Velocidade para o cálculo da posição
-
         # Pergunta se o utilizador quer continuar após parar (não é necessário na primeira vez)
         if stop:
             continua = input("Pretende continuar (s/n)? - ")
@@ -124,6 +104,7 @@ if conSuc:  # Se a conexão for bem sucedida
         # Obtain robot's original position and joint angle
         suc, v_origin, id = ether.sendCMD(sock, "get_tcp_pose", debug, {
             "unit_type": 0})  # Get robot's current pose (!!!tool!!!). Rotations in degrees.
+        v_origin = np.array(v_origin)
 
         # Debug
         if debug == "s":
@@ -134,13 +115,11 @@ if conSuc:  # Se a conexão for bem sucedida
 
         if result == 0:
             suc, result, id = ether.sendCMD(sock, "transparent_transmission_init", debug,
-                                            {"lookahead": 200, "t": 2, "smoothness": 0.1, "response_enable": 1})
+                                            {"lookahead": 200, "t": 2, "smoothness": 1, "response_enable": 1})
 
-        time1 = time.time()
         while True:
-            time2 = time.time()
-            t = time2 - time1
-            time1 = time2
+            speedCP = [0, 0, 0]  # Velocidade para o cálculo da posição
+
             # Print instructions if it is the first run
             if firstrun:
                 print("Para parar insira 'q'")
@@ -194,14 +173,17 @@ if conSuc:  # Se a conexão for bem sucedida
                 g = 0
 
             # Get new pose based on sensor key value and add it to tt buff
-            speedCP, v_origin = calculate_position(data, speedCP, v_origin)
-            pose_now = v_origin
+            global data
+            if data is not None:
+                v_origin += data
+            pose_now = v_origin  # Convert the new position to a list
 
             if debug == "s":
                 print("Principal - pose_now:", pose_now)
 
             # Inverse kinematics and send to buffer
             suc, p_target, id = ether.sendCMD(sock, "inverseKinematic", debug, {"targetPose": pose_now, "unit_type": 0})
+            print("Principal - p_target:", p_target)
             suc, result, id = ether.sendCMD(sock, "tt_put_servo_joint_to_buf", debug, {"targetPos": p_target})
 
             # Debug
