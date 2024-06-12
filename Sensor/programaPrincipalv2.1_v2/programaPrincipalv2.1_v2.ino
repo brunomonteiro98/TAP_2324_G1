@@ -200,9 +200,9 @@ void loop() {
           lowPassCountZ = 0;
         }
 
-        lax = laxN * 0.20 + lax * 0.80;  // low pass filter alternativo que confia x no novo valor e 1-x no antigo
-        lay = layN * 0.20 + lax * 0.80;
-        laz = lazN * 0.20 + lax * 0.80;
+        lax = laxN * 0.25 + lax * 0.75;  // low pass filter alternativo que confia x no novo valor e 1-x no antigo
+        lay = layN * 0.25 + lax * 0.75;
+        laz = lazN * 0.25 + lax * 0.75;
 
         static long last = micros();
         now = micros();

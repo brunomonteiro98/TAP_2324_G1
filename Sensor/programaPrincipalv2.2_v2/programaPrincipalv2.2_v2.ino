@@ -25,17 +25,23 @@ long reportIntervalUsLA = 1000;
 sh2_SensorId_t reportTypeYPR = SH2_ROTATION_VECTOR;
 long reportIntervalUsRV = 5000;
 
-bool originSet = false; // Flag to check if origin is set
-bool debug = false; // Set this to true to enable debug prints, false to disable
+const float accelerationThresholdX = 0.048; // Threshold for low-pass filter for X-axis
+const float accelerationThresholdY = 0.052; // Threshold for low-pass filter for Y-axis
+const float accelerationThresholdZ = 0.082;  // Threshold for low-pass filter for Z-axis
+const int resetThreshold = 10;  // Number of consecutive low readings to reset velocity
+const float dampingFactor = 1;  // Damping factor to reduce speed
 
-const float stationaryThreshold = 0.05; // To know if isStationary  MODIFICAR
-const int resetThreshold = 10;  // Number of consecutive low readings to reset velocity MODIFICAR
-int lowPassCount = 0;
+int lowPassCountX = 0;
+int lowPassCountY = 0;
+int lowPassCountZ = 0;
 
 const float processNoise = 1e-5;  // 1e-5  MODIFICAR
 const float measurementNoise = 1e-2;  // 1e-2  MODIFICAR
 const float estimationError = 1;  // 1
 const float initialValue = 0;  // 0
+
+bool originSet = false; // Flag to check if origin is set
+bool debug = false; // Set this to true to enable debug prints, false to disable
 
 class KalmanFilter {
 private:
@@ -103,6 +109,11 @@ void calculate_position(XYZ* speed, XYZ* position, XYZ* positionIncrement, float
   speed->y += lay * t;
   speed->z += laz * t;
 
+  // Apply damping factor to simulate friction
+  speed->x *= dampingFactor;
+  speed->y *= dampingFactor;
+  speed->z *= dampingFactor;
+
   positionIncrement->x = speed->x * t * 1e3; // Convert to mm
   positionIncrement->y = speed->y * t * 1e3; // Convert to mm
   positionIncrement->z = speed->z * t * 1e3; // Convert to mm
@@ -120,11 +131,6 @@ void calculate_angle_increments(euler_t* yprIncrement) {
 
   // Update previous yaw, pitch, and roll values for next iteration
   prevYPR = ypr;
-}
-
-bool isStationary(float ax, float ay, float az) {
-  // return (abs(ax) < stationaryThreshold) && (abs(ay) < stationaryThreshold) && (abs(az) < stationaryThreshold);
-  return (abs(ax) < stationaryThreshold) && (abs(ay) < stationaryThreshold);
 }
 
 void setup() {
@@ -158,9 +164,15 @@ void setup() {
 }
 
 void loop() {
+
   float lax;
+  float laxN;
   float lay;
+  float layN;
   float laz;
+  float lazN;
+  long now;
+  float t;
 
   if (bno08x.wasReset()) {
     if (debug) {
@@ -179,7 +191,61 @@ void loop() {
 
   if (bno08x.getSensorEvent(&sensorValue)) {
     switch (sensorValue.sensorId) {
+      case SH2_LINEAR_ACCELERATION:
+        
+        // Read linear accelerations (m/s^2)
+        lax = sensorValue.un.linearAcceleration.x;
+        lay = sensorValue.un.linearAcceleration.y;
+        laz = sensorValue.un.linearAcceleration.z;
+
+        // Low pass filter for accelerations and reset speed if necessary
+        if (abs(lax) < accelerationThresholdX) {
+          lowPassCountX++;
+          if (lowPassCountX >= resetThreshold) {
+            speed.x = 0;
+            lowPassCountX = 0;
+          }
+          lax = 0;
+        } else {
+          lowPassCountX = 0;
+        }
+
+        if (abs(lay) < accelerationThresholdY) {
+          lowPassCountY++;
+          if (lowPassCountY >= resetThreshold) {
+            speed.y = 0;
+            lowPassCountY = 0;
+          }
+          lay = 0;
+        } else {
+          lowPassCountY = 0;
+        }
+
+        if (abs(laz) < accelerationThresholdZ) {
+          lowPassCountZ++;
+          if (lowPassCountZ >= resetThreshold) {
+            speed.z = 0;
+            lowPassCountZ = 0;
+          }
+          laz = 0;
+        } else {
+          lowPassCountZ = 0;
+        }
+
+        lax = kalmanX.update(lax);
+        lay = kalmanX.update(lay);
+        laz = kalmanX.update(laz);
+
+        static long last = micros();
+        now = micros();
+        t = (now - last) / 1e6; // Convert to seconds
+        last = now;
+
+        calculate_position(&speed, &position, &positionIncrement, lax, lay, laz, t);
+        break;
+
       case SH2_ROTATION_VECTOR:
+
         quaternionToEulerRV(&sensorValue.un.rotationVector, &ypr, true);
 
         if (!originSet) {
@@ -206,40 +272,9 @@ void loop() {
           if (ypr.roll < -180) ypr.roll += 360;
           if (ypr.roll > 180) ypr.roll -= 360;
         }
+
+        calculate_angle_increments(&yprIncrement);    
         break;
-    }
-
-    static long lastLA = micros();
-    if (micros() - lastLA > reportIntervalUsLA) {
-    lastLA = micros();
-    
-    // Read linear accelerations (m/s^2)
-    lax = sensorValue.un.linearAcceleration.x;
-    lay = sensorValue.un.linearAcceleration.y;
-    laz = sensorValue.un.linearAcceleration.z;
-
-    // Check if the sensor is stationary
-    if (!isStationary(lax, lay, laz)) {
-      lax = kalmanX.update(lax);
-      lay = kalmanX.update(lay);
-      laz = kalmanX.update(laz);
-
-      calculate_position(&speed, &position, &positionIncrement, lax, lay, laz, reportIntervalUsLA / 1e6);
-    } else {
-      lowPassCount++;
-      if (lowPassCount >= resetThreshold) {
-        speed = {0, 0, 0};
-        lowPassCount = 0;
-      } else {
-        lowPassCount = 0;
-      }
-    }
-    }
-
-    static long lastRV = micros();
-    if (micros() - lastRV > reportIntervalUsRV) {
-    lastRV = micros();
-    calculate_angle_increments(&yprIncrement);
     }
 
     if (debug) {
