@@ -25,9 +25,9 @@ long reportIntervalUsLA = 1000;
 sh2_SensorId_t reportTypeYPR = SH2_ROTATION_VECTOR;
 long reportIntervalUsRV = 5000;
 
-const float accelerationThresholdX = 0.05; // Threshold for low-pass filter for X-axis
-const float accelerationThresholdY = 0.05; // Threshold for low-pass filter for Y-axis
-const float accelerationThresholdZ = 0.08;  // Threshold for low-pass filter for Z-axis
+const float accelerationThresholdX = 0.048; // Threshold for low-pass filter for X-axis
+const float accelerationThresholdY = 0.052; // Threshold for low-pass filter for Y-axis
+const float accelerationThresholdZ = 0.082;  // Threshold for low-pass filter for Z-axis
 const int resetThreshold = 10;  // Number of consecutive low readings to reset velocity
 const float dampingFactor = 1;  // Damping factor to reduce speed
 
@@ -132,9 +132,15 @@ void setup() {
 }
 
 void loop() {
+
   float lax;
+  float laxN;
   float lay;
+  float layN;
   float laz;
+  float lazN;
+  long now;
+  float t;
 
   if (bno08x.wasReset()) {
     if (debug) {
@@ -153,7 +159,61 @@ void loop() {
 
   if (bno08x.getSensorEvent(&sensorValue)) {
     switch (sensorValue.sensorId) {
+      case SH2_LINEAR_ACCELERATION:
+
+        // Read linear accelerations (m/s^2)
+        laxN = sensorValue.un.linearAcceleration.x;
+        layN = sensorValue.un.linearAcceleration.y;
+        lazN = sensorValue.un.linearAcceleration.z;
+
+        // Low pass filter for accelerations and reset speed if necessary
+        if (abs(laxN) < accelerationThresholdX) {
+          lowPassCountX++;
+          if (lowPassCountX >= resetThreshold) {
+            speed.x = 0;
+            lowPassCountX = 0;
+          }
+          laxN = 0;
+        } else {
+          lowPassCountX = 0;
+        }
+
+        if (abs(layN) < accelerationThresholdY) {
+          lowPassCountY++;
+          if (lowPassCountY >= resetThreshold) {
+            speed.y = 0;
+            lowPassCountY = 0;
+          }
+          layN = 0;
+        } else {
+          lowPassCountY = 0;
+        }
+
+        if (abs(lazN) < accelerationThresholdZ) {
+          lowPassCountZ++;
+          if (lowPassCountZ >= resetThreshold) {
+            speed.z = 0;
+            lowPassCountZ = 0;
+          }
+          lazN = 0;
+        } else {
+          lowPassCountZ = 0;
+        }
+
+        lax = laxN * 0.20 + lax * 0.80;  // low pass filter alternativo que confia x no novo valor e 1-x no antigo
+        lay = layN * 0.20 + lax * 0.80;
+        laz = lazN * 0.20 + lax * 0.80;
+
+        static long last = micros();
+        now = micros();
+        t = (now - last) / 1e6; // Convert to seconds
+        last = now;
+
+        calculate_position(&speed, &position, &positionIncrement, lax, lay, laz, t);
+        break;
+
       case SH2_ROTATION_VECTOR:
+
         quaternionToEulerRV(&sensorValue.un.rotationVector, &ypr, true);
 
         if (!originSet) {
@@ -180,59 +240,9 @@ void loop() {
           if (ypr.roll < -180) ypr.roll += 360;
           if (ypr.roll > 180) ypr.roll -= 360;
         }
+
+        calculate_angle_increments(&yprIncrement);
         break;
-    }
-
-    static long lastLA = micros();
-    if (micros() - lastLA > reportIntervalUsLA) {
-    lastLA = micros();
-
-    // Read linear accelerations (m/s^2)
-    lax = sensorValue.un.linearAcceleration.x;
-    lay = sensorValue.un.linearAcceleration.y;
-    laz = sensorValue.un.linearAcceleration.z;
-
-    // Low pass filter for accelerations and reset speed if necessary
-    if (abs(lax) < accelerationThresholdX) {
-      lowPassCountX++;
-      if (lowPassCountX >= resetThreshold) {
-        speed.x = 0;
-        lowPassCountX = 0;
-      }
-      lax = 0;
-    } else {
-      lowPassCountX = 0;
-    }
-
-    if (abs(lay) < accelerationThresholdY) {
-      lowPassCountY++;
-      if (lowPassCountY >= resetThreshold) {
-        speed.y = 0;
-        lowPassCountY = 0;
-      }
-      lay = 0;
-    } else {
-      lowPassCountY = 0;
-    }
-
-    if (abs(laz) < accelerationThresholdZ) {
-      lowPassCountZ++;
-      if (lowPassCountZ >= resetThreshold) {
-        speed.z = 0;
-        lowPassCountZ = 0;
-      }
-      laz = 0;
-    } else {
-      lowPassCountZ = 0;
-    }
-
-    calculate_position(&speed, &position, &positionIncrement, lax, lay, laz, reportIntervalUsLA / 1e6);
-    }
-
-    static long lastRV = micros();
-    if (micros() - lastRV > reportIntervalUsRV) {
-    lastRV = micros();
-    calculate_angle_increments(&yprIncrement);
     }
 
     if (debug) {
