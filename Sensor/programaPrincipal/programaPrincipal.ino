@@ -216,14 +216,13 @@ void loop() {
 
         quaternionToEulerRV(&sensorValue.un.arvrStabilizedRV, &ypr, true);
 
-          // Ensure angles are within -180 to 180 degrees
-          if (ypr.yaw < -180) ypr.yaw += 360;
-          if (ypr.yaw > 180) ypr.yaw -= 360;
-          if (ypr.pitch < -180) ypr.pitch += 360;
-          if (ypr.pitch > 180) ypr.pitch -= 360;
-          if (ypr.roll < -180) ypr.roll += 360;
-          if (ypr.roll > 180) ypr.roll -= 360;
-        }
+        // Ensure angles are within -180 to 180 degrees
+        if (ypr.yaw < -180) ypr.yaw += 360;
+        if (ypr.yaw > 180) ypr.yaw -= 360;
+        if (ypr.pitch < -180) ypr.pitch += 360;
+        if (ypr.pitch > 180) ypr.pitch -= 360;
+        if (ypr.roll < -180) ypr.roll += 360;
+        if (ypr.roll > 180) ypr.roll -= 360;
 
         calculate_angle_increments(&yprIncrement);
         break;
@@ -247,6 +246,7 @@ void loop() {
     // data = String(positionIncrement.x) + "," + String(positionIncrement.y) + "," + String(positionIncrement.z) + "," + String(yprIncrement.yaw) + "," + String(yprIncrement.pitch) + "," + String(yprIncrement.roll);
     data = String(position.x) + "," + String(position.y) + "," + String(position.z) + "," + String(ypr.yaw) + "," + String(ypr.pitch) + "," + String(ypr.roll);
     Serial.println(data);
+
   } else {
     if (debug) {
       Serial.println("No sensor event received.");

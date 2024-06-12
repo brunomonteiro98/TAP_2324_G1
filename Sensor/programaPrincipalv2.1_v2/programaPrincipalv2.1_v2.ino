@@ -115,7 +115,7 @@ void setup() {
     }
     while (1) { delay(10); }
   }
-  
+
   if (debug) {
     Serial.println("BNO08x Found!");
   }
@@ -263,6 +263,7 @@ void loop() {
     // data = String(positionIncrement.x) + "," + String(positionIncrement.y) + "," + String(positionIncrement.z) + "," + String(yprIncrement.yaw) + "," + String(yprIncrement.pitch) + "," + String(yprIncrement.roll);
     data = String(position.x) + "," + String(position.y) + "," + String(position.z) + "," + String(ypr.yaw) + "," + String(ypr.pitch) + "," + String(ypr.roll);
     Serial.println(data);
+    
   } else {
     if (debug) {
       Serial.println("No sensor event received.");
