@@ -1,7 +1,6 @@
 # Grava os dados do sensor
 def record(p_target, firstrung, lastrung, g, speed, debug):
     if firstrung:
-        # ficheiro = open("gravacaoJBI.txt", "w")
         ficheiro = open("gravacaoJBI.jbi", "w")
         firststring = "NOP\n"
         ficheiro.write(firststring)
@@ -11,7 +10,6 @@ def record(p_target, firstrung, lastrung, g, speed, debug):
             print("Play - firststring:", firststring)
         return firstrung, lastrung, g
     if not firstrung and not lastrung:
-        # ficheiro = open("gravacaoJBI.txt", "a")  # Abrir o ficheiro para adicionar
         ficheiro = open("gravacaoJBI.jbi", "a")  # Abrir o ficheiro para adicionar
         string = ("SETJOINT P001 " + str(p_target[0]) + "," + str(p_target[1]) + "," + str(p_target[2]) + "," + str(p_target[3]) + "," + str(p_target[4]) + "," + str(p_target[5]) + "\n")
         ficheiro.write(string)
@@ -23,7 +21,6 @@ def record(p_target, firstrung, lastrung, g, speed, debug):
             print("Gravação - string:", string)
         return firstrung, lastrung, g
     if lastrung:
-        # ficheiro = open("gravacaoJBI.txt", "a")  # Abrir o ficheiro para adicionar
         ficheiro = open("gravacaoJBI.jbi", "a")  # Abrir o ficheiro para adicionar
         laststring = "END"
         ficheiro.write(laststring)
