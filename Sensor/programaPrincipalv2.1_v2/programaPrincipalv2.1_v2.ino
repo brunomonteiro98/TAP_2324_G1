@@ -69,7 +69,7 @@ void quaternionToEuler(float qr, float qi, float qj, float qk, euler_t* ypr, boo
 }
 
 void quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, euler_t* ypr, bool degrees = false) {
-  quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
+    quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
 }
 
 void calculate_position(XYZ* speed, XYZ* position, XYZ* positionIncrement, float lax, float lay, float laz, float t) {

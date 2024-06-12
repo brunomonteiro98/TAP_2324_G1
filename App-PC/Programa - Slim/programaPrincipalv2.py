@@ -57,8 +57,7 @@ if conSuc:  # Se a conexão for bem sucedida
     initialpos = "n"  # Variável para identificar se o robô deve ir para a posição inicial
     firstrungJBI = True  # Variável para identificar se é a primeira vez que o modulo gravação corre
     lastrungJBI = False  # Variável para identificar se é a última vez que o modulo gravação corre
-    # initialpoint = [90, -100, 110, -190, 85, 0]  # posição inicial do robô (em joint angles)
-    initialpoint = [90, -100, 110, 0, 0, 0]  # posição inicial do robô (em joint angles)
+    initialpoint = [90, -100, 110, -190, 85, 0]  # posição inicial do robô (em joint angles)
 
     # Set robot's speed
     suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})
@@ -183,7 +182,6 @@ if conSuc:  # Se a conexão for bem sucedida
 
             # Inverse kinematics and send to buffer
             suc, p_target, id = ether.sendCMD(sock, "inverseKinematic", debug, {"targetPose": pose_now, "unit_type": 0})
-            print("Principal - p_target:", p_target)
             suc, result, id = ether.sendCMD(sock, "tt_put_servo_joint_to_buf", debug, {"targetPos": p_target})
 
             # Debug
