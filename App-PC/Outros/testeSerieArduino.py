@@ -1,5 +1,4 @@
 # Importação das bibliotecas necessárias
-import json  # Biblioteca para manipulação de arquivos json
 import serial  # Biblioteca para comunicação serial
 
 # Definição da variável global
