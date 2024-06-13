@@ -29,7 +29,6 @@ const float accelerationThresholdX = 0.048; // Threshold for low-pass filter for
 const float accelerationThresholdY = 0.052; // Threshold for low-pass filter for Y-axis
 const float accelerationThresholdZ = 0.082;  // Threshold for low-pass filter for Z-axis
 const int resetThreshold = 10;  // Number of consecutive low readings to reset velocity
-const float dampingFactor = 1;  // Damping factor to reduce speed
 
 int lowPassCountX = 0;
 int lowPassCountY = 0;
@@ -109,11 +108,6 @@ void calculate_position(XYZ* speed, XYZ* position, XYZ* positionIncrement, float
   speed->y += lay * t;
   speed->z += laz * t;
 
-  // Apply damping factor to simulate friction
-  speed->x *= dampingFactor;
-  speed->y *= dampingFactor;
-  speed->z *= dampingFactor;
-
   positionIncrement->x = speed->x * t * 1e3; // Convert to mm
   positionIncrement->y = speed->y * t * 1e3; // Convert to mm
   positionIncrement->z = speed->z * t * 1e3; // Convert to mm
@@ -147,7 +141,7 @@ void setup() {
     }
     while (1) { delay(10); }
   }
-  
+
   if (debug) {
     Serial.println("BNO08x Found!");
   }
@@ -192,7 +186,7 @@ void loop() {
   if (bno08x.getSensorEvent(&sensorValue)) {
     switch (sensorValue.sensorId) {
       case SH2_LINEAR_ACCELERATION:
-        
+
         // Read linear accelerations (m/s^2)
         lax = sensorValue.un.linearAcceleration.x;
         lay = sensorValue.un.linearAcceleration.y;
@@ -263,7 +257,7 @@ void loop() {
           ypr.yaw -= originYPR.yaw;
           ypr.pitch -= originYPR.pitch;
           ypr.roll -= originYPR.roll;
-          
+
           // Ensure angles are within -180 to 180 degrees
           if (ypr.yaw < -180) ypr.yaw += 360;
           if (ypr.yaw > 180) ypr.yaw -= 360;
@@ -273,7 +267,7 @@ void loop() {
           if (ypr.roll > 180) ypr.roll -= 360;
         }
 
-        calculate_angle_increments(&yprIncrement);    
+        calculate_angle_increments(&yprIncrement);
         break;
     }
 
@@ -286,10 +280,8 @@ void loop() {
       Serial.println(send);
       send = "Increments: " + String(positionIncrement.x) + "," + String(positionIncrement.y) + "," + String(positionIncrement.z);
       Serial.println(send);
-      // send = "Angles: " + String(ypr.yaw) + "," + String(ypr.pitch) + "," + String(ypr.roll);
-      // Serial.println(send);
-      // send = "Angle Increments: " + String(yprIncrement.yaw) + "," + String(yprIncrement.pitch) + "," + String(yprIncrement.roll);
-      // Serial.println(send);
+      send = "Angle Increments: " + String(yprIncrement.yaw) + "," + String(yprIncrement.pitch) + "," + String(yprIncrement.roll);
+      Serial.println(send);
       delay(500);
     }
 
@@ -303,4 +295,3 @@ void loop() {
     }
   }
 }
-

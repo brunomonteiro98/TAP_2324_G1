@@ -29,7 +29,6 @@ const float accelerationThresholdX = 0.048; // Threshold for low-pass filter for
 const float accelerationThresholdY = 0.052; // Threshold for low-pass filter for Y-axis
 const float accelerationThresholdZ = 0.082;  // Threshold for low-pass filter for Z-axis
 const int resetThreshold = 10;  // Number of consecutive low readings to reset velocity
-const float dampingFactor = 1;  // Damping factor to reduce speed
 
 int lowPassCountX = 0;
 int lowPassCountY = 0;
@@ -69,18 +68,13 @@ void quaternionToEuler(float qr, float qi, float qj, float qk, euler_t* ypr, boo
 }
 
 void quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, euler_t* ypr, bool degrees = false) {
-    quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
+  quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
 }
 
 void calculate_position(XYZ* speed, XYZ* position, XYZ* positionIncrement, float lax, float lay, float laz, float t) {
   speed->x += lax * t;
   speed->y += lay * t;
   speed->z += laz * t;
-
-  // Apply damping factor to simulate friction
-  speed->x *= dampingFactor;
-  speed->y *= dampingFactor;
-  speed->z *= dampingFactor;
 
   positionIncrement->x = speed->x * t * 1e3; // Convert to mm
   positionIncrement->y = speed->y * t * 1e3; // Convert to mm
@@ -200,9 +194,9 @@ void loop() {
           lowPassCountZ = 0;
         }
 
-        lax = laxN * 0.25 + lax * 0.75;  // low pass filter alternativo que confia x no novo valor e 1-x no antigo
-        lay = layN * 0.25 + lax * 0.75;
-        laz = lazN * 0.25 + lax * 0.75;
+        lax = laxN * 0.75 + lax * 0.25;  // low pass filter alternativo que confia x no novo valor e 1-x no antigo
+        lay = layN * 0.75 + lax * 0.25;
+        laz = lazN * 0.75 + lax * 0.25;
 
         static long last = micros();
         now = micros();
@@ -254,7 +248,7 @@ void loop() {
       Serial.println(send);
       send = "Increments: " + String(positionIncrement.x) + "," + String(positionIncrement.y) + "," + String(positionIncrement.z);
       Serial.println(send);
-      send = "Angle Increment: " + String(yprIncrement.yaw) + "," + String(yprIncrement.pitch) + "," + String(yprIncrement.roll);
+      send = "Angle Increments: " + String(yprIncrement.yaw) + "," + String(yprIncrement.pitch) + "," + String(yprIncrement.roll);
       Serial.println(send);
       delay(500);
     }
@@ -263,7 +257,6 @@ void loop() {
     // data = String(positionIncrement.x) + "," + String(positionIncrement.y) + "," + String(positionIncrement.z) + "," + String(yprIncrement.yaw) + "," + String(yprIncrement.pitch) + "," + String(yprIncrement.roll);
     data = String(position.x) + "," + String(position.y) + "," + String(position.z) + "," + String(ypr.yaw) + "," + String(ypr.pitch) + "," + String(ypr.roll);
     Serial.println(data);
-    
   } else {
     if (debug) {
       Serial.println("No sensor event received.");
