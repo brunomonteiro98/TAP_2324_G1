@@ -10,11 +10,6 @@ Modulo Serie:
     2- Ir ao gestor de dispositivos e ver a porta COM que o robot está a usar
     3- Inserir porta COM no programa
 
-Modulo Wifi:
-    1- Smartphone cria hotspot wifi com nome "test" e senha "123456789"
-    2- Escolher ip fixo para o modulo wifi (mesmo q está no esp) e colocá-lo nas definições wifi do pc ()
-    3- Porta 11111
-
 Modulo Ethernet:
     1- Ligar cabo ethernet ao pc e ao robot
     2- Mudar o ip do pc nas definições (ip manual) para um no mesmo ip do robot com ultimo nr diferente e mesma netmask
@@ -42,7 +37,3 @@ To-do:
 Comentários
 - Para não haver delay: Tim send = 20x t sampling do robot 40 para 2 (Teoria: tempo de execução do programa)
 - Delay não depende da velocidade do robô!
-
-Sensor não está a dar incrementos mas posições
-
-Testar método do carlos para tudo !!!
