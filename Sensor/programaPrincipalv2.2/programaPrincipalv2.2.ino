@@ -25,42 +25,38 @@ long reportIntervalUsLA = 1000;
 sh2_SensorId_t reportTypeYPR = SH2_ROTATION_VECTOR;
 long reportIntervalUsRV = 5000;
 
-const float accelerationThresholdX = 0.048; // Threshold for low-pass filter for X-axis
-const float accelerationThresholdY = 0.052; // Threshold for low-pass filter for Y-axis
-const float accelerationThresholdZ = 0.082;  // Threshold for low-pass filter for Z-axis
+const float accelerationThresholdX = 0.048;
+const float accelerationThresholdY = 0.052;
+const float accelerationThresholdZ = 0.082;
 const int resetThreshold = 10;  // Number of consecutive low readings to reset velocity
 
 int lowPassCountX = 0;
 int lowPassCountY = 0;
 int lowPassCountZ = 0;
 
-const float processNoise = 1e-5;  // 1e-5  MODIFICAR
-const float measurementNoise = 1e-2;  // 1e-2  MODIFICAR
-const float estimationError = 1;  // 1
-const float initialValue = 0;  // 0
+const float processNoise = 1e-5;
+const float measurementNoise = 1e-2;
+const float estimationError = 1;
+const float initialValue = 0;
 
-bool originSet = false; // Flag to check if origin is set
-bool debug = false; // Set this to true to enable debug prints, false to disable
+bool originSet = false;
+bool debug = false;
 
 class KalmanFilter {
 private:
   float Q, R, P, x, K;
 public:
   KalmanFilter(float Q, float R, float P, float initial_x) {
-    this->Q = Q; // Process noise covariance (+ = adapta-se + rápido mas mais noise; - = mais conservador mas mais lento)!
-    this->R = R; // Measurement noise covariance (+ = confia mais nos dados do sensor; - = contrário)!
-    this->P = P; // Estimation error covariance
-    this->x = initial_x; // Initial value of the estimated signal
+    this->Q = Q; // (+ = adapta-se + rápido mas mais noise; - = mais conservador mas mais lento)
+    this->R = R; // (+ = confia mais nos dados do sensor; - = contrário)
+    this->P = P;
+    this->x = initial_x;
   }
   float update(float measurement) {
-    // Prediction update
     this->P += this->Q;
-    
-    // Measurement update
     this->K = this->P / (this->P + this->R);
     this->x += this->K * (measurement - this->x);
     this->P *= (1 - this->K);
-    
     return this->x;
   }
 };
@@ -118,12 +114,9 @@ void calculate_position(XYZ* speed, XYZ* position, XYZ* positionIncrement, float
 }
 
 void calculate_angle_increments(euler_t* yprIncrement) {
-  // Calculate yaw, pitch, and roll increments
   yprIncrement->yaw = ypr.yaw - prevYPR.yaw;
   yprIncrement->pitch = ypr.pitch - prevYPR.pitch;
   yprIncrement->roll = ypr.roll - prevYPR.roll;
-
-  // Update previous yaw, pitch, and roll values for next iteration
   prevYPR = ypr;
 }
 
@@ -146,7 +139,6 @@ void setup() {
     Serial.println("BNO08x Found!");
   }
 
-  // Ensure sensor stabilization before setting origin
   delay(1000);
 
   setReports(reportTypeXYZ, reportIntervalUsLA);
@@ -158,13 +150,7 @@ void setup() {
 }
 
 void loop() {
-
-  float lax;
-  float laxN;
-  float lay;
-  float layN;
-  float laz;
-  float lazN;
+  float lax, lay, laz;
   long now;
   float t;
 
@@ -172,12 +158,10 @@ void loop() {
     if (debug) {
       Serial.println("Sensor was reset");
     }
-    delay(1000); // Allow sensor to stabilize
-    originSet = false; // Reset originSet flag
+    delay(1000);
+    originSet = false;
     setReports(reportTypeXYZ, reportIntervalUsLA);
     setReports(reportTypeYPR, reportIntervalUsRV);
-
-    // Reset position and speed
     speed = {0, 0, 0};
     position = {0, 0, 0};
     positionIncrement = {0, 0, 0};
@@ -186,13 +170,10 @@ void loop() {
   if (bno08x.getSensorEvent(&sensorValue)) {
     switch (sensorValue.sensorId) {
       case SH2_LINEAR_ACCELERATION:
-
-        // Read linear accelerations (m/s^2)
         lax = sensorValue.un.linearAcceleration.x;
         lay = sensorValue.un.linearAcceleration.y;
         laz = sensorValue.un.linearAcceleration.z;
 
-        // Low pass filter for accelerations and reset speed if necessary
         if (abs(lax) < accelerationThresholdX) {
           lowPassCountX++;
           if (lowPassCountX >= resetThreshold) {
@@ -227,8 +208,8 @@ void loop() {
         }
 
         lax = kalmanX.update(lax);
-        lay = kalmanX.update(lay);
-        laz = kalmanX.update(laz);
+        lay = kalmanY.update(lay);
+        laz = kalmanZ.update(laz);
 
         static long last = micros();
         now = micros();
@@ -239,7 +220,6 @@ void loop() {
         break;
 
       case SH2_ROTATION_VECTOR:
-
         quaternionToEulerRV(&sensorValue.un.rotationVector, &ypr, true);
 
         if (!originSet) {
@@ -251,14 +231,12 @@ void loop() {
             Serial.print(", Pitch: "); Serial.print(originYPR.pitch);
             Serial.print(", Roll: "); Serial.println(originYPR.roll);
           }
-          break; // Exit switch case
+          break;
         } else {
-          // Calculate relative Euler angles from origin
           ypr.yaw -= originYPR.yaw;
           ypr.pitch -= originYPR.pitch;
           ypr.roll -= originYPR.roll;
 
-          // Ensure angles are within -180 to 180 degrees
           if (ypr.yaw < -180) ypr.yaw += 360;
           if (ypr.yaw > 180) ypr.yaw -= 360;
           if (ypr.pitch < -180) ypr.pitch += 360;
@@ -272,10 +250,7 @@ void loop() {
     }
 
     if (debug) {
-      // For debugging
       String send;
-      // send = "Accuracy (0-3): " + String(sensorValue.status);
-      // Serial.println(send);
       send = "Linear acceleration: " + String(lax) + "," + String(lay) + "," + String(laz);
       Serial.println(send);
       send = "Increments: " + String(positionIncrement.x) + "," + String(positionIncrement.y) + "," + String(positionIncrement.z);
@@ -286,7 +261,6 @@ void loop() {
     }
 
     String data;
-    // data = String(positionIncrement.x) + "," + String(positionIncrement.y) + "," + String(positionIncrement.z) + "," + String(yprIncrement.yaw) + "," + String(yprIncrement.pitch) + "," + String(yprIncrement.roll);
     data = String(position.x) + "," + String(position.y) + "," + String(position.z) + "," + String(ypr.yaw) + "," + String(ypr.pitch) + "," + String(ypr.roll);
     Serial.println(data);
   } else {
