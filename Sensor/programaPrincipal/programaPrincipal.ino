@@ -28,14 +28,14 @@ long reportIntervalUsRV = 5000;
 const float accelerationThresholdX = 0.048;
 const float accelerationThresholdY = 0.052;
 const float accelerationThresholdZ = 0.082;
-const int resetThreshold = 10;  // Number of consecutive low readings to reset velocity
+const int resetThreshold = 10; // Number of consecutive low readings to reset velocity
 
 int lowPassCountX = 0;
 int lowPassCountY = 0;
 int lowPassCountZ = 0;
 
-const float processNoise = 1e-5;
-const float measurementNoise = 1e-2;
+const float processNoise = 1e-5; // (+ = adapta-se + rápido mas mais noise; - = mais conservador mas mais lento)
+const float measurementNoise = 1e-2; // (+ = confia mais nos dados do sensor; - = contrário)
 const float estimationError = 1;
 const float initialValue = 0;
 
@@ -47,8 +47,8 @@ private:
   float Q, R, P, x, K;
 public:
   KalmanFilter(float Q, float R, float P, float initial_x) {
-    this->Q = Q; // (+ = adapta-se + rápido mas mais noise; - = mais conservador mas mais lento)
-    this->R = R; // (+ = confia mais nos dados do sensor; - = contrário)
+    this->Q = Q;
+    this->R = R;
     this->P = P;
     this->x = initial_x;
   }
@@ -124,29 +124,18 @@ void setup() {
   Serial.begin(115200);
   while (!Serial) delay(10);
 
-  if (debug) {
-    Serial.println("Adafruit BNO08x test!");
-  }
-
   if (!bno08x.begin_I2C()) {
     if (debug) {
       Serial.println("Failed to find BNO08x chip");
     }
-    while (1) { delay(10); }
-  }
-
-  if (debug) {
-    Serial.println("BNO08x Found!");
+    while (1) {
+      delay(10);
+    }
   }
 
   delay(1000);
-
   setReports(reportTypeXYZ, reportIntervalUsLA);
   setReports(reportTypeYPR, reportIntervalUsRV);
-
-  if (debug) {
-    Serial.println("Reading events");
-  }
 }
 
 void loop() {
@@ -155,9 +144,6 @@ void loop() {
   float t;
 
   if (bno08x.wasReset()) {
-    if (debug) {
-      Serial.println("Sensor was reset");
-    }
     delay(1000);
     originSet = false;
     setReports(reportTypeXYZ, reportIntervalUsLA);
@@ -207,9 +193,10 @@ void loop() {
           lowPassCountZ = 0;
         }
 
-        lax = kalmanX.update(lax);
-        lay = kalmanY.update(lay);
-        laz = kalmanZ.update(laz);
+        // Low-pass filter
+        lax = lax * 0.25 + kalmanX.update(lax) * 0.75;
+        lay = lay * 0.25 + kalmanY.update(lay) * 0.75;
+        laz = laz * 0.25 + kalmanZ.update(laz) * 0.75;
 
         static long last = micros();
         now = micros();
@@ -225,12 +212,6 @@ void loop() {
         if (!originSet) {
           originYPR = ypr;
           originSet = true;
-          if (debug) {
-            Serial.print("Origin set to: ");
-            Serial.print("Yaw: "); Serial.print(originYPR.yaw);
-            Serial.print(", Pitch: "); Serial.print(originYPR.pitch);
-            Serial.print(", Roll: "); Serial.println(originYPR.roll);
-          }
           break;
         } else {
           ypr.yaw -= originYPR.yaw;
@@ -249,23 +230,8 @@ void loop() {
         break;
     }
 
-    if (debug) {
-      String send;
-      send = "Linear acceleration: " + String(lax) + "," + String(lay) + "," + String(laz);
-      Serial.println(send);
-      send = "Increments: " + String(positionIncrement.x) + "," + String(positionIncrement.y) + "," + String(positionIncrement.z);
-      Serial.println(send);
-      send = "Angle Increments: " + String(yprIncrement.yaw) + "," + String(yprIncrement.pitch) + "," + String(yprIncrement.roll);
-      Serial.println(send);
-      delay(500);
-    }
-
     String data;
     data = String(position.x) + "," + String(position.y) + "," + String(position.z) + "," + String(ypr.yaw) + "," + String(ypr.pitch) + "," + String(ypr.roll);
     Serial.println(data);
-  } else {
-    if (debug) {
-      Serial.println("No sensor event received.");
-    }
   }
 }
