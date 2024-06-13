@@ -216,14 +216,6 @@ void loop() {
 
         quaternionToEulerRV(&sensorValue.un.arvrStabilizedRV, &ypr, true);
 
-        // Ensure angles are within -180 to 180 degrees
-        if (ypr.yaw < -180) ypr.yaw += 360;
-        if (ypr.yaw > 180) ypr.yaw -= 360;
-        if (ypr.pitch < -180) ypr.pitch += 360;
-        if (ypr.pitch > 180) ypr.pitch -= 360;
-        if (ypr.roll < -180) ypr.roll += 360;
-        if (ypr.roll > 180) ypr.roll -= 360;
-
         calculate_angle_increments(&yprIncrement);
         break;
     }
