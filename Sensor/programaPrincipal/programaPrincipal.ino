@@ -5,6 +5,11 @@
 #define BNO08X_INT 9
 #define BNO08X_RESET -1
 
+// Apenas para ajuste de threshold. Depois apagar
+float maxlax = 0;
+float maxlay = 0;
+float maxlaz = 0;
+
 struct euler_t {
   float yaw;
   float pitch;
@@ -25,10 +30,10 @@ long reportIntervalUsLA = 1000;
 sh2_SensorId_t reportTypeYPR = SH2_ROTATION_VECTOR;
 long reportIntervalUsRV = 5000;
 
-const float accelerationThresholdX = 0.048;
-const float accelerationThresholdY = 0.052;
-const float accelerationThresholdZ = 0.082;
-const int resetThreshold = 10; // Number of consecutive low readings to reset velocity
+const float accelerationThresholdX = 0.1;
+const float accelerationThresholdY = 0.1;
+const float accelerationThresholdZ = 0.1;
+const int resetThreshold = 5; // Number of consecutive low readings to reset velocity
 
 int lowPassCountX = 0;
 int lowPassCountY = 0;
@@ -160,6 +165,17 @@ void loop() {
         lay = sensorValue.un.linearAcceleration.y;
         laz = sensorValue.un.linearAcceleration.z;
 
+        // Apenas para ajuste de threshold. Depois apagar
+        if (lax > maxlax) {
+          maxlax = lax;
+        }
+        if (lay > maxlay) {
+          maxlay = lay;
+        }
+        if (laz > maxlaz) {
+          maxlaz = laz;
+        }
+
         if (abs(lax) < accelerationThresholdX) {
           lowPassCountX++;
           if (lowPassCountX >= resetThreshold) {
@@ -231,7 +247,8 @@ void loop() {
     }
 
     String data;
-    data = String(position.x) + "," + String(position.y) + "," + String(position.z) + "," + String(ypr.yaw) + "," + String(ypr.pitch) + "," + String(ypr.roll);
+    data = String(maxlax,10) + "," + String(maxlay,10) + "," + String(maxlaz,10);
+    //data = String(positionIncrement.x,10) + "," + String(positionIncrement.y,10) + "," + String(positionIncrement.z,10) + "," + String(yprIncrement.yaw,10) + "," + String(yprIncrement.pitch,10) + "," + String(yprIncrement.roll,10);
+    //data = String(position.x,10) + "," + String(position.y,10) + "," + String(position.z,10) + "," + String(ypr.yaw,10) + "," + String(ypr.pitch,10) + "," + String(ypr.roll,10);
     Serial.println(data);
-  }
-}
+  }}
