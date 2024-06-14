@@ -1,7 +1,6 @@
 # Importação das bibliotecas necessárias
 import time  # Biblioteca para manipulação de tempo
 import keyboard  # Biblioteca para manipulação de teclado
-import threading  # Biblioteca para manipulação de threads
 import numpy as np  # Biblioteca para manipulação de arrays
 import moduloSerie as serie  # Biblioteca para comunicação serial
 import moduloEthernet as ether  # Biblioteca para comunicação Ethernet
@@ -27,26 +26,6 @@ speed = int(input("Velocidade do robô (0.05-100%) - "))  # Velocidade do robô
 
 # ==================================================================================================================== #
 
-# Debug
-global debug
-debug = input("Debug? (s/n) - ")
-
-# ==================================================================================================================== #
-
-
-# Definição das funções das threads
-def task():
-    global data
-    while True:
-        data = serie.read_serial_data(debug)  # Ler os dados do sensor
-        time.sleep(0.01)
-
-# Criar a thread e iniciar
-t = threading.Thread(target=task, daemon=True)  # Criar a thread para ler os dados do sensor
-t.start()  # Iniciar a thread
-
-# ==================================================================================================================== #
-
 if conSuc:  # Se a conexão for bem sucedida
 
     # Definição de variáveis
@@ -60,10 +39,10 @@ if conSuc:  # Se a conexão for bem sucedida
     initialpoint = [90, -100, 110, -190, 85, 0]  # posição inicial do robô (em joint angles)
 
     # Set robot's speed
-    suc, result, id = ether.sendCMD(sock, "setSpeed", debug, {"value": speed})
+    suc, result, id = ether.sendCMD(sock, "setSpeed", {"value": speed})
 
     # Obter a posição atual do robô
-    suc, v_origin, id = ether.sendCMD(sock, "get_joint_pos", debug,
+    suc, v_origin, id = ether.sendCMD(sock, "get_joint_pos",
                                       {"unit_type": 0})  # Get robot's current pos (!!!joint!!!). Rotations in degrees.
     v_origin = list(np.round(v_origin))
     if v_origin != initialpoint:  # Se a posição inicial for diferente da posição atual
@@ -81,7 +60,7 @@ if conSuc:  # Se a conexão for bem sucedida
                 break
 
             # Obter a posição atual do robô
-            suc, v_origin, id = ether.sendCMD(sock, "get_joint_pos", debug, {
+            suc, v_origin, id = ether.sendCMD(sock, "get_joint_pos", {
                 "unit_type": 0})  # Get robot's current pos (!!!joint!!!). Rotations in degrees.
             v_origin = list(np.round(v_origin))
             if v_origin != initialpoint:  # Se a posição inicial for diferente da posição atual
@@ -89,7 +68,7 @@ if conSuc:  # Se a conexão for bem sucedida
 
         # Move robot to initialpos if requested
         if initialpos == "s":
-            suc, result, id = ether.sendCMD(sock, "moveByJoint", debug,
+            suc, result, id = ether.sendCMD(sock, "moveByJoint",
                                             {"targetPos": initialpoint, "speed": speed, "acc": 75, "dec": 75})
             while True:
                 suc, result, id = ether.sendCMD(sock, "getRobotState")
@@ -98,22 +77,17 @@ if conSuc:  # Se a conexão for bem sucedida
             initialpos = "n"
 
         # Sets the coordinate system
-        suc, result, id = ether.sendCMD(sock, "setCurrentCoord", debug, {"coord_mode": 2})
+        suc, result, id = ether.sendCMD(sock, "setCurrentCoord", {"coord_mode": 2})
 
         # Obtain robot's original position and joint angle
-        suc, v_origin, id = ether.sendCMD(sock, "get_tcp_pose", debug, {
+        suc, v_origin, id = ether.sendCMD(sock, "get_tcp_pose", {
             "unit_type": 0})  # Get robot's current pose (!!!tool!!!). Rotations in degrees.
-        v_origin = np.array(v_origin)
-
-        # Debug
-        if debug == "s":
-            print("Principal - v_origin:", v_origin)
 
         # Initialize transparent transmission
         suc, result, id = ether.sendCMD(sock, "get_transparent_transmission_state")
 
         if result == 0:
-            suc, result, id = ether.sendCMD(sock, "transparent_transmission_init", debug,
+            suc, result, id = ether.sendCMD(sock, "transparent_transmission_init",
                                             {"lookahead": 200, "t": 2, "smoothness": 1, "response_enable": 1})
 
         while True:
@@ -129,7 +103,7 @@ if conSuc:  # Se a conexão for bem sucedida
             if keyboard.is_pressed("q"):
                 time.sleep(0.1)
                 suc, result, id = ether.sendCMD(sock, "stop")
-                suc, result, id = ether.sendCMD(sock, "tt_clear_servo_joint_buf", debug, {"clear": 0})
+                suc, result, id = ether.sendCMD(sock, "tt_clear_servo_joint_buf", {"clear": 0})
                 stop = True
                 break
 
@@ -152,15 +126,13 @@ if conSuc:  # Se a conexão for bem sucedida
                     now = time.time()
                     elapsedtime = now - starttime  # Calculate elapsed time
                     if elapsedtime > 2:  # Record every 2 seconds
-                        firstrungJBI, lastrungJBI, g = gravacaoJBI.record(p_target, firstrungJBI, lastrungJBI, g, speed,
-                                                                          debug)
+                        firstrungJBI, lastrungJBI, g = gravacaoJBI.record(p_target, firstrungJBI, lastrungJBI, g, speed)
                         starttime = now  # Reset start time
                         print("Ponto gravado")
                 elif gmode == "p":
                     if keyboard.is_pressed("f"):
                         time.sleep(0.1)
-                        firstrungJBI, lastrungJBI, g = gravacaoJBI.record(p_target, firstrungJBI, lastrungJBI, g, speed,
-                                                                          debug)
+                        firstrungJBI, lastrungJBI, g = gravacaoJBI.record(p_target, firstrungJBI, lastrungJBI, g, speed)
                         print("Ponto gravado")
 
             # Stop recording if 'h' is pressed
@@ -168,31 +140,26 @@ if conSuc:  # Se a conexão for bem sucedida
                 time.sleep(0.1)
                 print("Gravação terminada")
                 lastrungJBI = True
-                firstrungJBI, lastrungJBI, g = gravacaoJBI.record(p_target, firstrungJBI, lastrungJBI, g, speed, debug)
+                firstrungJBI, lastrungJBI, g = gravacaoJBI.record(p_target, firstrungJBI, lastrungJBI, g, speed)
                 g = 0
 
             # Get new pose based on sensor key value and add it to tt buff
-            global data
+            data = serie.read_serial_data()
             if data is not None:
-                v_origin += data
-            pose_now = v_origin  # Convert the new position to a list
-
-            if debug == "s":
-                print("Principal - pose_now:", pose_now)
+                v_origin[0] += data[0]
+                v_origin[1] += data[1]
+                v_origin[2] += data[2]
+                v_origin[3] += data[3]
+                v_origin[4] += data[4]
+                v_origin[5] += data[5]
+            pose_now = v_origin
 
             # Inverse kinematics and send to buffer
-            suc, p_target, id = ether.sendCMD(sock, "inverseKinematic", debug, {"targetPose": pose_now, "unit_type": 0})
-            suc, result, id = ether.sendCMD(sock, "tt_put_servo_joint_to_buf", debug, {"targetPos": p_target})
-
-            # Debug
-            if debug == "s":
-                print("Principal - p_target:", p_target)
-                print("Principal - result:", result)
+            suc, p_target, id = ether.sendCMD(sock, "inverseKinematic", {"targetPose": pose_now, "unit_type": 0})
+            suc, result, id = ether.sendCMD(sock, "tt_put_servo_joint_to_buf", {"targetPos": p_target})
 
         # Stop the robot
         suc, result, id = ether.sendCMD(sock, "stop")
-
-        time.sleep(0.01)
 
 # Desconectar o controlador e a porta serial
 ether.disconnectETController(sock)
