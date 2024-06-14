@@ -25,17 +25,17 @@ long reportIntervalUsLA = 1000;
 sh2_SensorId_t reportTypeYPR = SH2_ROTATION_VECTOR;
 long reportIntervalUsRV = 5000;
 
-const float accelerationThresholdX = 0.050;
-const float accelerationThresholdY = 0.050;
-const float accelerationThresholdZ = 0.075;
-const int resetThreshold = 10; // Number of consecutive low readings to reset velocity
+const float accelerationThresholdX = 0.05; // 0.10 ou 0.05 (testar na 2a)
+const float accelerationThresholdY = 0.05; // 0.10 ou 0.05 (testar na 2a)
+const float accelerationThresholdZ = 0.10;
+const int resetThreshold = 10;
 
 int lowPassCountX = 0;
 int lowPassCountY = 0;
 int lowPassCountZ = 0;
 
-const float processNoise = 1e-5; // (+ = adapta-se + rápido mas mais noise; - = mais conservador mas mais lento)
-const float measurementNoise = 1e-2; // (+ = confia mais nos dados do sensor; - = contrário)
+const float processNoise = 1e-5;
+const float measurementNoise = 1e-2;
 const float estimationError = 1;
 const float initialValue = 0;
 
@@ -149,7 +149,6 @@ void loop() {
     delay(1000);
     setReports(reportTypeXYZ, reportIntervalUsLA);
     setReports(reportTypeYPR, reportIntervalUsRV);
-    delay(12000);
     originSet = false;
     speed = {0, 0, 0};
     position = {0, 0, 0};

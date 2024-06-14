@@ -29,6 +29,7 @@ def read_serial_data():  # Função para ler os dados disponíveis na porta seri
         data = data.decode('utf-8').rstrip()
         data = data.split(',')
         data = [-float(data[1]) / 2.5, float(data[0]) / 2.5, float(data[2]) / 5, float(data[5]) / 10, float(data[4]) / 10, -float(data[3]) / 10]
+        # 2.5 ou 3 para x e y (testar na 2a)
         return data
 
 
