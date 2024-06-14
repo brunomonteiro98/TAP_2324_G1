@@ -25,9 +25,9 @@ long reportIntervalUsLA = 1000;
 sh2_SensorId_t reportTypeYPR = SH2_ROTATION_VECTOR;
 long reportIntervalUsRV = 5000;
 
-const float accelerationThresholdX = 0.05;
-const float accelerationThresholdY = 0.05;
-const float accelerationThresholdZ = 0.10;
+const float accelerationThresholdX = 0.050;
+const float accelerationThresholdY = 0.050;
+const float accelerationThresholdZ = 0.075;
 const int resetThreshold = 10; // Number of consecutive low readings to reset velocity
 
 int lowPassCountX = 0;
@@ -38,6 +38,8 @@ const float processNoise = 1e-5; // (+ = adapta-se + rápido mas mais noise; - =
 const float measurementNoise = 1e-2; // (+ = confia mais nos dados do sensor; - = contrário)
 const float estimationError = 1;
 const float initialValue = 0;
+
+const float betaNew = 0.25;
 
 bool originSet = false;
 bool debug = false;
@@ -145,9 +147,10 @@ void loop() {
 
   if (bno08x.wasReset()) {
     delay(1000);
-    originSet = false;
     setReports(reportTypeXYZ, reportIntervalUsLA);
     setReports(reportTypeYPR, reportIntervalUsRV);
+    delay(12000);
+    originSet = false;
     speed = {0, 0, 0};
     position = {0, 0, 0};
     positionIncrement = {0, 0, 0};
@@ -194,9 +197,9 @@ void loop() {
         }
 
         // Low-pass filter
-        lax = lax * 0.25 + kalmanX.update(lax) * 0.75;
-        lay = lay * 0.25 + kalmanY.update(lay) * 0.75;
-        laz = laz * 0.25 + kalmanZ.update(laz) * 0.75;
+        lax = lax * betaNew + kalmanX.update(lax) * (1-betaNew);
+        lay = lay * betaNew + kalmanY.update(lay) * (1-betaNew);
+        laz = laz * betaNew + kalmanZ.update(laz) * (1-betaNew);
 
         static long last = micros();
         now = micros();
@@ -231,7 +234,7 @@ void loop() {
     }
 
     String data;
-    data = String(positionIncrement.x,10) + "," + String(positionIncrement.y,10) + "," + String(positionIncrement.z,10) + "," + String(yprIncrement.yaw,10) + "," + String(yprIncrement.pitch,10) + "," + String(yprIncrement.roll,10);
-    //data = String(position.x,10) + "," + String(position.y,10) + "," + String(position.z,10) + "," + String(ypr.yaw,10) + "," + String(ypr.pitch,10) + "," + String(ypr.roll,10);
+    //data = String(positionIncrement.x,10) + "," + String(positionIncrement.y,10) + "," + String(positionIncrement.z,10) + "," + String(yprIncrement.yaw,10) + "," + String(yprIncrement.pitch,10) + "," + String(yprIncrement.roll,10);
+    data = String(position.x,5) + "," + String(position.y,5) + "," + String(position.z,5) + "," + String(ypr.yaw) + "," + String(ypr.pitch) + "," + String(ypr.roll);
     Serial.println(data);
   }}

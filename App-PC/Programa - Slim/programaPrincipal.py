@@ -22,7 +22,13 @@ conSuc, sock = ether.connectETController(ip)  # Conectar ao controlador
 # ==================================================================================================================== #
 
 # Velocidade do robô (0-100%)
-speed = int(input("Velocidade do robô (0.05-100%) - "))  # Velocidade do robô
+speed = 20
+#speed = int(input("Velocidade do robô (0.05-100%) - "))  # Velocidade do robô
+
+# ==================================================================================================================== #
+
+# Modo de leitura (l, r, 2)
+leitura = input("Modo de leitura (l, r, 2) - ")  # Modo de leitura
 
 # ==================================================================================================================== #
 
@@ -69,7 +75,8 @@ if conSuc:  # Se a conexão for bem sucedida
         # Move robot to initialpos if requested
         if initialpos == "s":
             suc, result, id = ether.sendCMD(sock, "moveByJoint",
-                                            {"targetPos": initialpoint, "speed": speed, "acc": 75, "dec": 75})
+                                            {"targetPos": initialpoint, "speed": speed, "acc": 50, "dec": 50})
+            time.sleep(0.1)  # Necessário
             while True:
                 suc, result, id = ether.sendCMD(sock, "getRobotState")
                 if result == 0:
@@ -146,12 +153,22 @@ if conSuc:  # Se a conexão for bem sucedida
             # Get new pose based on sensor key value and add it to tt buff
             data = serie.read_serial_data()
             if data is not None:
-                v_origin[0] += data[0]
-                v_origin[1] += data[1]
-                v_origin[2] += data[2]
-                v_origin[3] += data[3]
-                v_origin[4] += data[4]
-                v_origin[5] += data[5]
+                match leitura:
+                    case "l":
+                        v_origin[0] += data[0]
+                        v_origin[1] += data[1]
+                        v_origin[2] += data[2]
+                    case "r":
+                        v_origin[3] += data[3]
+                        v_origin[4] += data[4]
+                        v_origin[5] += data[5]
+                    case "2":
+                        v_origin[0] += data[0]
+                        v_origin[1] += data[1]
+                        v_origin[2] += data[2]
+                        v_origin[3] += data[3]
+                        v_origin[4] += data[4]
+                        v_origin[5] += data[5]
             pose_now = v_origin
 
             # Inverse kinematics and send to buffer
