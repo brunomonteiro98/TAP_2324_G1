@@ -233,7 +233,7 @@ void loop() {
     }
 
     String data;
-    //data = String(positionIncrement.x,10) + "," + String(positionIncrement.y,10) + "," + String(positionIncrement.z,10) + "," + String(yprIncrement.yaw,10) + "," + String(yprIncrement.pitch,10) + "," + String(yprIncrement.roll,10);
-    data = String(position.x,5) + "," + String(position.y,5) + "," + String(position.z,5) + "," + String(ypr.yaw) + "," + String(ypr.pitch) + "," + String(ypr.roll);
+    data = String(positionIncrement.x,5) + "," + String(positionIncrement.y,5) + "," + String(positionIncrement.z,5) + "," + String(yprIncrement.yaw,5) + "," + String(yprIncrement.pitch,5) + "," + String(yprIncrement.roll,5);
+    //data = String(position.x,5) + "," + String(position.y,5) + "," + String(position.z,5) + "," + String(ypr.yaw) + "," + String(ypr.pitch) + "," + String(ypr.roll);
     Serial.println(data);
   }}
